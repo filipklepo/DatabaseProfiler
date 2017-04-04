@@ -15,6 +15,8 @@ public class DatabaseProfiler extends Application {
     private Stage primaryStage;
     private BorderPane rootLayout;
 
+    private Connection connection;
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
@@ -50,14 +52,12 @@ public class DatabaseProfiler extends Application {
         return primaryStage;
     }
 
+    public void setConnection(Connection connection) {
+        this.connection = connection;
+    }
+
     public static void main(String[] args) throws ClassNotFoundException, SQLException {
         launch(args);
-
-        //Class.forName("org.postgresql.Driver");
-
-        //Connection connection = DriverManager.getConnection(
-        //            "jdbc:postgresql://127.0.0.1:5432/dvdrental", "postgres",
-        //            "filip95");
 
         //DatabaseMetaData metadata = connection.getMetaData();
         //ResultSet tables = metadata.getTables(null, null, "%",

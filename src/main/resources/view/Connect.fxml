@@ -9,31 +9,32 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="367.0" prefWidth="393.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="439.0" prefWidth="393.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <ButtonBar layoutX="26.0" layoutY="315.0" prefHeight="40.0" prefWidth="342.0">
+      <ButtonBar layoutX="25.0" layoutY="377.0" prefHeight="40.0" prefWidth="342.0">
         <buttons>
-          <Button mnemonicParsing="false" text="Test Connection" />
-            <Button mnemonicParsing="false" text="Connect" />
+          <Button id="btnTest" mnemonicParsing="false" text="Test Connection" />
+            <Button id="btnConnect" mnemonicParsing="false" text="Connect" />
         </buttons>
       </ButtonBar>
-      <Label layoutX="52.0" layoutY="215.0" prefHeight="16.0" prefWidth="101.0" text="Username:" />
-      <Label layoutX="52.0" layoutY="253.0" prefHeight="16.0" prefWidth="74.0" text="Password:" />
-      <Label layoutX="19.0" layoutY="14.0" prefHeight="16.0" prefWidth="261.0" text="Connect to a database...">
+      <Label layoutX="50.0" layoutY="278.0" prefHeight="16.0" prefWidth="101.0" text="Username:" />
+      <Label layoutX="51.0" layoutY="314.0" prefHeight="16.0" prefWidth="74.0" text="Password:" />
+      <Label layoutX="13.0" layoutY="8.0" prefHeight="16.0" prefWidth="261.0" text="Connect to a database...">
          <font>
             <Font size="15.0" />
          </font>
       </Label>
-      <TextField layoutX="163.0" layoutY="210.0" />
-      <Label layoutX="62.0" layoutY="53.0" text="Type:" />
-      <PasswordField layoutX="163.0" layoutY="248.0" />
-      <ChoiceBox layoutX="162.0" layoutY="48.0" prefWidth="150.0" />
-      <Label layoutX="59.0" layoutY="122.0" text="Port:" />
-      <TextField layoutX="163.0" layoutY="117.0" prefHeight="26.0" prefWidth="74.0" />
-      <Label layoutX="59.0" layoutY="159.0" text="Name:" />
-      <TextField layoutX="163.0" layoutY="154.0" />
-      <Label layoutX="60.0" layoutY="88.0" text="Address:" />
-      <TextField layoutX="163.0" layoutY="83.0" />
+      <TextField id="tfUsername" layoutX="164.0" layoutY="274.0" />
+      <Label layoutX="58.0" layoutY="82.0" text="Type:" />
+      <PasswordField id="tfPassword" layoutX="164.0" layoutY="309.0" />
+      <ChoiceBox id="cbType" layoutX="165.0" layoutY="76.0" prefWidth="150.0" />
+      <Label layoutX="59.0" layoutY="158.0" text="Port:" />
+      <TextField id="tfPort" layoutX="164.0" layoutY="156.0" prefHeight="26.0" prefWidth="74.0" />
+      <Label layoutX="60.0" layoutY="201.0" text="Name:" />
+      <TextField id="tfName" layoutX="163.0" layoutY="194.0" />
+      <Label layoutX="58.0" layoutY="122.0" text="Address:" />
+      <TextField id="tfAddress" layoutX="165.0" layoutY="118.0" />
+      <Label layoutX="126.0" layoutY="44.0" text="Database parameters" />
+      <Label layoutX="134.0" layoutY="242.0" text="User credentials" />
    </children>
 </AnchorPane>

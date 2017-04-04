@@ -1,22 +1,33 @@
 package hr.fer.zavrad.dbprofiler.model;
 
 public enum DatabaseType {
-    POSTGRE("postgresql", "5432"),
-    MYSQL("mysql", "3306");
+    POSTGRE("postgresql", "PostgreSQL", "5432"),
+    MYSQL("mysql", "MySQL", "3306");
 
-    private String name;
+    private String connectionName;
+    private String fullName;
     private String port;
 
-    DatabaseType(String name, String port) {
-        this.name = name;
+    DatabaseType(String connectionNname, String fullName, String port) {
+        this.connectionName = connectionNname;
+        this.fullName = fullName;
         this.port = port;
     }
 
-    public String getName() {
-        return name;
+    public String getConnectionName() {
+        return connectionName;
+    }
+
+    public String getFullName() {
+        return fullName;
     }
 
     public String getPort() {
-        return this.port;
+        return port;
+    }
+
+    @Override
+    public String toString() {
+        return fullName;
     }
 }

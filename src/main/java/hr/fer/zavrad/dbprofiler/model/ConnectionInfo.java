@@ -13,7 +13,8 @@ import java.util.Optional;
 public class ConnectionInfo {
 
     public static final String DEFAULT_ADDRESS = "127.0.0.1";
-    public static final String CONNECTION_STRING_TEMPLATE = "jdbc:%s://%s:%s/%s";
+
+    private static final String CONNECTION_STRING_TEMPLATE = "jdbc:%s://%s:%s/%s";
 
     private final ObjectProperty<DatabaseType> type;
 
