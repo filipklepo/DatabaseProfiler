@@ -1,0 +1,8 @@
+# User-specific stuff:
+.idea/
+
+.idea_modules/
+
+# Gradle
+.gradle
+/build/
