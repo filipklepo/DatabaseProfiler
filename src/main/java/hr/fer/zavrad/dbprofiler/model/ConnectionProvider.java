@@ -64,7 +64,7 @@ public class ConnectionInfo {
         }
 
         try {
-            String connectionString = String.format(CONNECTION_STRING_TEMPLATE, type.getValue().getName(),
+            String connectionString = String.format(CONNECTION_STRING_TEMPLATE, type.getValue().getConnectionName(),
                                         address.getValue(), port.getValue(), databaseName.getValue());
 
             Connection connection = DriverManager.getConnection(connectionString, username.getValue(),
