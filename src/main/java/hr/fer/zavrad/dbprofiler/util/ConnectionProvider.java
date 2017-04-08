@@ -10,7 +10,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Optional;
 
-public class ConnectionInfo {
+public class ConnectionProvider {
 
     public static final String DEFAULT_ADDRESS = "127.0.0.1";
 
@@ -25,13 +25,13 @@ public class ConnectionInfo {
     private final StringProperty username;
     private final StringProperty password;
 
-    public ConnectionInfo(DatabaseType type, String databaseName, String username,
-                          String password) {
+    public ConnectionProvider(DatabaseType type, String databaseName, String username,
+                              String password) {
         this(type, DEFAULT_ADDRESS, type.getPort(), databaseName, username, password);
     }
 
-    public ConnectionInfo(DatabaseType type, String address, String port,
-                          String databaseName, String username, String password) {
+    public ConnectionProvider(DatabaseType type, String address, String port,
+                              String databaseName, String username, String password) {
         this.type = new SimpleObjectProperty<>(type);
         this.address = new SimpleStringProperty(address);
         this.port = new SimpleStringProperty(port);
@@ -41,7 +41,7 @@ public class ConnectionInfo {
     }
 
     /**
-     * Establishes connection with database defined by ConnectionInfo's member variables. If for whatever reason
+     * Establishes connection with database defined by ConnectionProvider's member variables. If for whatever reason
      * connection can not be established, <b>Optional.empty()</b> is returned.
      *
      * @return database connection
@@ -67,10 +67,8 @@ public class ConnectionInfo {
             String connectionString = String.format(CONNECTION_STRING_TEMPLATE, type.getValue().getConnectionName(),
                                         address.getValue(), port.getValue(), databaseName.getValue());
 
-            Connection connection = DriverManager.getConnection(connectionString, username.getValue(),
-                                                                password.getValue());
-
-            return Optional.of(connection);
+            return Optional.of(DriverManager.getConnection(connectionString, username.getValue(),
+                                                           password.getValue()));
         } catch (SQLException e) {
             return Optional.empty();
         }
