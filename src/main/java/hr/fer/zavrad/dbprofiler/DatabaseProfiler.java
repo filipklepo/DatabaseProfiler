@@ -1,79 +1,84 @@
 package hr.fer.zavrad.dbprofiler;
 
+import hr.fer.zavrad.dbprofiler.controller.ConnectController;
+import hr.fer.zavrad.dbprofiler.controller.DatabaseOverviewController;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 import java.sql.*;
+import java.util.Optional;
 
 public class DatabaseProfiler extends Application {
 
     private Stage primaryStage;
-    private BorderPane rootLayout;
+    private Stage connectStage;
+    private AnchorPane connectLayout;
+    private AnchorPane databaseOverviewLayout;
 
-    private Connection connection;
+    private Optional<Connection> connection;
+
+    public DatabaseProfiler() {
+        connection = Optional.empty();
+    }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
+        this.connectStage = new Stage();
         this.primaryStage.setTitle("DatabaseProfiler");
 
         initRootLayout();
-        showDatabaseData();
     }
 
     private void initRootLayout() throws IOException {
         FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(DatabaseProfiler.class.getResource("/view/Root.fxml"));
-        rootLayout = loader.load();
+        loader.setLocation(DatabaseProfiler.class.getResource("/view/Connect.fxml"));
+        ConnectController connectController = new ConnectController(this);
+        loader.setController(connectController);
+        connectLayout = loader.load();
 
-        Scene scene = new Scene(rootLayout);
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        Scene scene = new Scene(connectLayout);
+        connectStage.setScene(scene);
+        connectStage.show();
+        connectStage.setOnHidden(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent event) {
+
+                if(connection.isPresent()) {
+                    FXMLLoader loader = new FXMLLoader();
+                    loader.setLocation(DatabaseProfiler.class.getResource("/view/DatabaseOverview.fxml"));
+                    DatabaseOverviewController overviewController = new DatabaseOverviewController(connection.get());
+                    loader.setController(overviewController);
+
+                    try {
+                        databaseOverviewLayout = loader.load();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    Scene scene = new Scene(databaseOverviewLayout);
+                    primaryStage.setScene(scene);
+                    primaryStage.show();
+                }
+            }
+        });
     }
 
-    private void showDatabaseData() {
-        try {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(DatabaseProfiler.class.getResource("/view/DatabaseOverview.fxml"));
-            AnchorPane databaseOverview = (AnchorPane) loader.load();
-
-            rootLayout.setCenter(databaseOverview);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public Stage getPrimaryStage() {
-        return primaryStage;
+    public Stage getConnectStage() {
+        return connectStage;
     }
 
     public void setConnection(Connection connection) {
-        this.connection = connection;
+        this.connection = Optional.of(connection);
     }
 
     public static void main(String[] args) throws ClassNotFoundException, SQLException {
         launch(args);
-
-        //DatabaseMetaData metadata = connection.getMetaData();
-        //ResultSet tables = metadata.getTables(null, null, "%",
-        //                                      new String[]{"TABLE"});
-        //while(tables.next()) {
-        //    String name = tables.getString("TABLE_NAME");
-        //    System.out.println(name);
-        //    System.out.println("---------------------------------------");
-
-        //    Statement st = connection.createStatement();
-        //    ResultSet rs = st.executeQuery("SELECT * FROM " + name);
-
-        //    rs.close();
-        //    st.close();
-
-        //    System.out.println();
-        //}
     }
 }

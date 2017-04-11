@@ -14,8 +14,8 @@
    <children>
       <ButtonBar layoutX="25.0" layoutY="377.0" prefHeight="40.0" prefWidth="342.0">
         <buttons>
-          <Button id="btnTest" mnemonicParsing="false" text="Test Connection" />
-            <Button id="btnConnect" mnemonicParsing="false" text="Connect" />
+          <Button fx:id="btnTest" mnemonicParsing="false" text="Test Connection" />
+            <Button fx:id="btnConnect" mnemonicParsing="false" text="Connect" />
         </buttons>
       </ButtonBar>
       <Label layoutX="50.0" layoutY="278.0" prefHeight="16.0" prefWidth="101.0" text="Username:" />
@@ -25,16 +25,16 @@
             <Font size="15.0" />
          </font>
       </Label>
-      <TextField id="tfUsername" layoutX="164.0" layoutY="274.0" />
+      <TextField fx:id="tfUsername" layoutX="164.0" layoutY="274.0" />
       <Label layoutX="58.0" layoutY="82.0" text="Type:" />
-      <PasswordField id="tfPassword" layoutX="164.0" layoutY="309.0" />
-      <ChoiceBox id="cbType" layoutX="165.0" layoutY="76.0" prefWidth="150.0" />
+      <PasswordField fx:id="tfPassword" layoutX="164.0" layoutY="309.0" />
+      <ChoiceBox fx:id="cbType" layoutX="165.0" layoutY="76.0" prefWidth="150.0" />
       <Label layoutX="59.0" layoutY="158.0" text="Port:" />
-      <TextField id="tfPort" layoutX="164.0" layoutY="156.0" prefHeight="26.0" prefWidth="74.0" />
+      <TextField fx:id="tfPort" layoutX="164.0" layoutY="156.0" prefHeight="26.0" prefWidth="74.0" />
       <Label layoutX="60.0" layoutY="201.0" text="Name:" />
-      <TextField id="tfName" layoutX="163.0" layoutY="194.0" />
+      <TextField fx:id="tfName" layoutX="163.0" layoutY="194.0" />
       <Label layoutX="58.0" layoutY="122.0" text="Address:" />
-      <TextField id="tfAddress" layoutX="165.0" layoutY="118.0" />
+      <TextField fx:id="tfAddress" layoutX="165.0" layoutY="118.0" />
       <Label layoutX="126.0" layoutY="44.0" text="Database parameters" />
       <Label layoutX="134.0" layoutY="242.0" text="User credentials" />
    </children>

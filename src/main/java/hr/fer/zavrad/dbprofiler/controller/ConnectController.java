@@ -1,26 +1,33 @@
 package hr.fer.zavrad.dbprofiler.controller;
 
 import hr.fer.zavrad.dbprofiler.DatabaseProfiler;
-import hr.fer.zavrad.dbprofiler.model.ConnectionInfo;
+import hr.fer.zavrad.dbprofiler.util.ConnectionGenerator;
 import hr.fer.zavrad.dbprofiler.model.DatabaseType;
+import hr.fer.zavrad.dbprofiler.util.AlertBox;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 
-public class ConnectController {
+import java.net.URL;
+import java.sql.Connection;
+import java.util.Optional;
+import java.util.ResourceBundle;
+
+public class ConnectController implements Initializable{
 
     @FXML
     private ChoiceBox cbType;
 
     @FXML
-    private Button buttonTest;
+    private Button btnTest;
     @FXML
-    private Button buttonConnect;
+    private Button btnConnect;
 
     @FXML
     private TextField tfAddress;
@@ -36,18 +43,21 @@ public class ConnectController {
 
     private DatabaseProfiler databaseProfiler;
 
-    public ConnectController() {
+    public ConnectController(DatabaseProfiler databaseProfiler) {
+        this.databaseProfiler = databaseProfiler;
     }
 
-    @FXML
-    private void initialize() {
-        tfAddress.setText(ConnectionInfo.DEFAULT_ADDRESS);
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
 
-        ObservableList<DatabaseType> cbItems = FXCollections.emptyObservableList();
-        cbItems.add(DatabaseType.POSTGRE);
-        cbItems.add(DatabaseType.MYSQL);
+        tfAddress.setText(ConnectionGenerator.DEFAULT_ADDRESS);
+
+        ObservableList<DatabaseType> cbItems = FXCollections.observableArrayList();
+        cbItems.addAll(DatabaseType.POSTGRE, DatabaseType.MYSQL);
         cbType.setItems(cbItems);
+
         cbType.getSelectionModel().selectFirst();
+        tfPort.setText(((DatabaseType)cbType.getValue()).getPort());
 
         cbType.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -60,31 +70,40 @@ public class ConnectController {
             }
         });
 
-        buttonTest.setOnAction(new EventHandler<ActionEvent>() {
+        btnTest.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                ConnectionInfo connectionInfo =
-                        new ConnectionInfo((DatabaseType) cbType.getValue(),
-                                           tfAddress.getText(),
-                                           tfPort.getText(),
-                                           tfName.getText(),
-                                           tfUsername.getText(),
-                                           tfPassword.getText());
+                ConnectionGenerator connectionGenerator = createConnectionGenerator();
 
-                if(connectionInfo.generateConnection().isPresent()) {
-
+                if(!connectionGenerator.generate().isPresent()) {
+                    AlertBox.display("Error", "Unable to connect to database with provided credentials.");
+                } else {
+                    AlertBox.display("Success", "Database with valid credentials is provided.");
                 }
             }
         });
-        buttonConnect.setOnAction(new EventHandler<ActionEvent>() {
+        btnConnect.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+                ConnectionGenerator connectionGenerator = createConnectionGenerator();
 
+                Optional<Connection> connection = connectionGenerator.generate();
+                if(!connection.isPresent()) {
+                    AlertBox.display("Error", "Unable to connect to database with provided credentials.");
+                } else {
+                    databaseProfiler.setConnection(connection.get());
+                    databaseProfiler.getConnectStage().hide();
+                }
             }
         });
     }
 
-    public void setDatabaseProfiler(DatabaseProfiler databaseProfiler) {
-        this.databaseProfiler = databaseProfiler;
+    private ConnectionGenerator createConnectionGenerator() {
+        return new ConnectionGenerator((DatabaseType) cbType.getValue(),
+                tfAddress.getText(),
+                tfPort.getText(),
+                tfName.getText(),
+                tfUsername.getText(),
+                tfPassword.getText());
     }
 }
