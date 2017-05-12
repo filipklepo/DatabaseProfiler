@@ -1,9 +1,10 @@
 package hr.fer.zavrad.dbprofiler.model;
 
-public enum ColumnType {
+public enum TableColumnType {
 
     BIT,
     TINYINT,
+    TEXT,
     BIGINT,
     LONGVARBINARY,
     VARBINARY,
@@ -22,5 +23,5 @@ public enum ColumnType {
     DATE,
     TIME,
     TIMESTAMP,
-    OTHER
+    OTHER,
 }

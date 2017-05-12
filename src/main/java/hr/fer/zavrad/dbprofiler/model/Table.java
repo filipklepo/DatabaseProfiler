@@ -1,7 +1,16 @@
 package hr.fer.zavrad.dbprofiler.model;
 
-/**
- * Created by filip on 11.05.17..
- */
-public class Table {
+public class Table extends DatabaseObject {
+
+    private final String name;
+
+    public Table(String name) {
+        super(DatabaseObjectType.TABLE);
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

@@ -9,17 +9,14 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 
-import java.net.URL;
 import java.sql.Connection;
 import java.util.Optional;
-import java.util.ResourceBundle;
 
-public class ConnectController implements Initializable{
+public class ConnectController {
 
     @FXML
     private ChoiceBox cbType;
@@ -47,8 +44,7 @@ public class ConnectController implements Initializable{
         this.databaseProfiler = databaseProfiler;
     }
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
+    public void initialize() {
 
         tfAddress.setText(ConnectionGenerator.DEFAULT_ADDRESS);
 
