@@ -51,12 +51,12 @@
                            <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                        </rowConstraints>
                        <children>
-                           <Label text="Max Value:" GridPane.rowIndex="1">
+                           <Label fx:id="lblMax" text="Max Value:" GridPane.rowIndex="1">
                                <GridPane.margin>
                                    <Insets />
                                </GridPane.margin>
                            </Label>
-                           <Label text="Min Value:" />
+                           <Label fx:id="lblMin" text="Min Value:" />
                            <Label fx:id="lblMinValue" text="MIN_VALUE" GridPane.columnIndex="1" />
                            <Label fx:id="lblMaxValue" text="MAX_VALUE" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                            <Label fx:id="lblMean" text="Mean:" GridPane.rowIndex="2" />

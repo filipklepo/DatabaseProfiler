@@ -159,8 +159,8 @@ public final class Connections {
                 int longestLineLength = Arrays.stream(lines).mapToInt(String::length).max().getAsInt();
 
                 Object vertex = graph.insertVertex(
-                        parent, null, table, i, i, longestLineLength * 7,
-                        lines.length * 15,"swimlane;rounded=1;");
+                        parent, null, table, i, i, longestLineLength * 8,
+                        lines.length * 18,"swimlane;rounded=1;");
                 vertexMap.put(table.getName(), vertex);
             }
 

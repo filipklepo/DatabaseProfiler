@@ -65,24 +65,48 @@ public class DatabaseOverviewController {
                     GridPane columnstatistics = null;
 
                     FXMLLoader loader = new FXMLLoader();
-                    if(Connections.isNumericColumn(column.getColumnType())) {
+                    if (Connections.isNumericColumn(column.getColumnType())) {
                         loader.setLocation(
                                 DatabaseOverviewController.class.getResource(
                                         "/view/NumericColumnStatistics.fxml"));
-                        NumericColumnStatisticsController controller =
-                                new NumericColumnStatisticsController((NumericColumnStatistics) column.getStatistics().get());
-                        loader.setController(controller);
+                        loader.setController(
+                                    new NumericColumnStatisticsController(
+                                            (NumericColumnStatistics) column.getStatistics().get()));
 
-                    } else if(Connections.isTextualColumn(column.getColumnType())) {
+                    } else if (Connections.isTextualColumn(column.getColumnType())) {
                         loader.setLocation(
                                 DatabaseOverviewController.class.getResource(
                                         "/view/TextualColumnStatistics.fxml"));
                         TextualColumnStatisticsController controller =
                                 new TextualColumnStatisticsController((TextualColumnStatistics) column.getStatistics().get());
                         loader.setController(controller);
-
                     } else {
-                        return;
+                        loader.setLocation(
+                                DatabaseOverviewController.class.getResource(
+                                        "/view/NumericColumnStatistics.fxml"));
+
+                        switch (column.getColumnType()) {
+                            case DATE:
+                                loader.setController(
+                                        new DateColumnStatisticsController(
+                                                (DateColumnStatistics)column.getStatistics().get()));
+                                break;
+                            case TIME:
+                                loader.setController(
+                                        new TimeColumnStatisticsController(
+                                                (TimeColumnStatistics)column.getStatistics().get()));
+                                break;
+                            case TIMESTAMP:
+                                loader.setController(
+                                        new TimestampColumnStatisticsController(
+                                                (TimestampColumnStatistics)column.getStatistics().get()));
+                                break;
+                            default:
+                                loader.setController(
+                                        new GenericColumnStatisticsController(
+                                                (GenericColumnStatistics)column.getStatistics().get())
+                                );
+                        }
                     }
 
                     try {
@@ -99,18 +123,6 @@ public class DatabaseOverviewController {
         btnRelationalDiagram.setOnMousePressed(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-//                final SwingNode swingNode = new SwingNode();
-//
-//                Connections.createDatabaseRelationshipDiagram(swingNode, connection);
-//
-//                StackPane pane = new StackPane();
-//                pane.getChildren().add(swingNode);
-//
-//                Stage stage = new Stage();
-//                stage.setTitle("Database relationship diagram");
-//                stage.setScene(new Scene(pane, 800, 600));
-//                stage.show();
-
                 Pane pane = null;
 
                 FXMLLoader loader = new FXMLLoader();

@@ -49,7 +49,7 @@ public class ConnectController {
         tfAddress.setText(ConnectionGenerator.DEFAULT_ADDRESS);
 
         ObservableList<DatabaseType> cbItems = FXCollections.observableArrayList();
-        cbItems.addAll(DatabaseType.POSTGRE, DatabaseType.MYSQL);
+        cbItems.addAll(DatabaseType.POSTGRE, DatabaseType.MYSQL, DatabaseType.SQL_SERVER);
         cbType.setItems(cbItems);
 
         cbType.getSelectionModel().selectFirst();
@@ -60,8 +60,10 @@ public class ConnectController {
             public void handle(ActionEvent event) {
                 if((DatabaseType)cbType.getValue() == DatabaseType.POSTGRE) {
                     tfPort.setText(DatabaseType.POSTGRE.getPort());
-                } else {
+                } else if((DatabaseType)cbType.getValue() == DatabaseType.MYSQL){
                     tfPort.setText(DatabaseType.MYSQL.getPort());
+                } else if((DatabaseType)cbType.getValue() == DatabaseType.SQL_SERVER){
+                    tfPort.setText(DatabaseType.SQL_SERVER.getPort());
                 }
             }
         });

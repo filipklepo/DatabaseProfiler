@@ -2,7 +2,8 @@ package hr.fer.zavrad.dbprofiler.model;
 
 public enum DatabaseType {
     POSTGRE("postgresql", "PostgreSQL", "5432"),
-    MYSQL("mysql", "MySQL", "3306");
+    MYSQL("mysql", "MySQL", "3306"),
+    SQL_SERVER("sqlserver", "SQL Server", "1433");
 
     private String connectionName;
     private String fullName;

@@ -1,12 +1,15 @@
 package hr.fer.zavrad.dbprofiler;
 
+import hr.fer.zavrad.dbprofiler.controller.ConnectController;
 import hr.fer.zavrad.dbprofiler.controller.DatabaseOverviewController;
 import hr.fer.zavrad.dbprofiler.model.DatabaseType;
 import hr.fer.zavrad.dbprofiler.util.ConnectionGenerator;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 import java.sql.*;
@@ -37,56 +40,56 @@ public class DatabaseProfiler extends Application {
     }
 
     private void initRootLayout() throws IOException {
-//        FXMLLoader connectLoader = new FXMLLoader();
-//        connectLoader.setLocation(DatabaseProfiler.class.getResource("/view/Connect.fxml"));
-//        ConnectController connectController = new ConnectController(this);
-//        connectLoader.setController(connectController);
-//
-//        Scene connectScene = new Scene(connectLoader.load());
-//        connectStage.setScene(connectScene);
-//        connectStage.show();
-//        connectStage.setOnHidden(new EventHandler<WindowEvent>() {
-//
-//            @Override
-//            public void handle(WindowEvent event) {
-//
-//                if(connection.isPresent()) {
-//                    FXMLLoader loader = new FXMLLoader();
-//                    loader.setLocation(DatabaseProfiler.class.getResource("/view/DatabaseOverview.fxml"));
-//                    DatabaseOverviewController overviewController = new DatabaseOverviewController(connection.get());
-//                    loader.setController(overviewController);
-//
-//                    try {
-//                        Scene scene = new Scene(loader.load(), WINDOW_WIDTH, WINDOW_HEIGHT);
-//                        scene.getStylesheets().add(
-//                                DatabaseProfiler.class.getResource("/assets/database_overview.css").toExternalForm());
-//
-//                        primaryStage.setScene(scene);
-//                        primaryStage.show();
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }
-//        });
+        FXMLLoader connectLoader = new FXMLLoader();
+        connectLoader.setLocation(DatabaseProfiler.class.getResource("/view/Connect.fxml"));
+        ConnectController connectController = new ConnectController(this);
+        connectLoader.setController(connectController);
 
-        connection =
-                new ConnectionGenerator(
-                        DatabaseType.POSTGRE,
-                        "dvdrental",
-                        "postgres",
-                        "filip95").generate();
-        FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(DatabaseProfiler.class.getResource("/view/DatabaseOverview.fxml"));
-        DatabaseOverviewController overviewController = new DatabaseOverviewController(connection.get());
-        loader.setController(overviewController);
+        Scene connectScene = new Scene(connectLoader.load());
+        connectStage.setScene(connectScene);
+        connectStage.show();
+        connectStage.setOnHidden(new EventHandler<WindowEvent>() {
 
-        Scene primaryScene = new Scene(loader.load(), WINDOW_WIDTH, WINDOW_HEIGHT);
-        primaryScene.getStylesheets().add(
-                DatabaseProfiler.class.getResource("/assets/database_overview.css").toExternalForm());
-        primaryStage.setScene(primaryScene);
+            @Override
+            public void handle(WindowEvent event) {
 
-        primaryStage.show();
+                if(connection.isPresent()) {
+                    FXMLLoader loader = new FXMLLoader();
+                    loader.setLocation(DatabaseProfiler.class.getResource("/view/DatabaseOverview.fxml"));
+                    DatabaseOverviewController overviewController = new DatabaseOverviewController(connection.get());
+                    loader.setController(overviewController);
+
+                    try {
+                        Scene scene = new Scene(loader.load(), WINDOW_WIDTH, WINDOW_HEIGHT);
+                        scene.getStylesheets().add(
+                                DatabaseProfiler.class.getResource("/assets/database_overview.css").toExternalForm());
+
+                        primaryStage.setScene(scene);
+                        primaryStage.show();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+
+//        connection =
+//                new ConnectionGenerator(
+//                        DatabaseType.POSTGRE,
+//                        "dvdrental",
+//                        "postgres",
+//                        "filip95").generate();
+//        FXMLLoader loader = new FXMLLoader();
+//        loader.setLocation(DatabaseProfiler.class.getResource("/view/DatabaseOverview.fxml"));
+//        DatabaseOverviewController overviewController = new DatabaseOverviewController(connection.get());
+//        loader.setController(overviewController);
+//
+//        Scene primaryScene = new Scene(loader.load(), WINDOW_WIDTH, WINDOW_HEIGHT);
+//        primaryScene.getStylesheets().add(
+//                DatabaseProfiler.class.getResource("/assets/database_overview.css").toExternalForm());
+//        primaryStage.setScene(primaryScene);
+//
+//        primaryStage.show();
     }
 
     public Stage getConnectStage() {

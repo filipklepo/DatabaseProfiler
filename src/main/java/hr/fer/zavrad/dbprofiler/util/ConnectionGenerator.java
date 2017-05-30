@@ -63,6 +63,13 @@ public class ConnectionGenerator {
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
+                break;
+            case SQL_SERVER:
+                try {
+                    Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
         }
 
         try {

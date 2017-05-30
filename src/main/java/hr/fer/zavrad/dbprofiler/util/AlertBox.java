@@ -1,5 +1,6 @@
 package hr.fer.zavrad.dbprofiler.util;
 
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -23,6 +24,8 @@ public class AlertBox {
         closeButton.setOnAction(e -> window.close());
 
         VBox layout = new VBox(10);
+        layout.setMargin(label, new Insets(10, 5, 5, 5));
+        layout.setMargin(closeButton, new Insets(0, 0, 10, 0));
         layout.getChildren().addAll(label, closeButton);
         layout.setAlignment(Pos.CENTER);
 

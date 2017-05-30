@@ -1,36 +1,31 @@
 package hr.fer.zavrad.dbprofiler.model;
 
-import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 
+import java.sql.Timestamp;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class NumericColumnStatistics extends ColumnStatistics {
+public class TimestampColumnStatistics extends ColumnStatistics {
 
-    private final Double minimumValue;
-    private final Double maximumValue;
-    private final Integer totalValuesCount;
-    private final Integer nullValuesCount;
-    private final Double mean;
-    private final Double stdDev;
+    private final Timestamp minimumValue;
+    private final Timestamp maximumValue;
+    private final Timestamp mean;
     private final XYChart.Series recordCountData;
     private final Optional<XYChart.Series> patternInformationData;
 
-    public NumericColumnStatistics(Integer totalValuesCount, Integer nullValuesCount, Double minimumValue,
-                                   Double maximumValue, Map<Double, Integer> valuesByCount, Double mean, Double stdDev) {
+    public TimestampColumnStatistics(Integer totalValuesCount, Integer nullValuesCount, Timestamp minimumValue,
+                                     Timestamp maximumValue, Timestamp mean, Long stdDev,
+                                     Map<Timestamp, Integer> valuesByCount) {
+
         this.minimumValue = minimumValue;
         this.maximumValue = maximumValue;
-        this.totalValuesCount = totalValuesCount;
-        this.nullValuesCount = nullValuesCount;
         this.mean = mean;
-        this.stdDev = stdDev;
 
         long patternValuesCount = valuesByCount.entrySet().stream().filter(e -> e.getValue() > 1).count();
-
 
         recordCountData = new XYChart.Series();
         recordCountData.getData().add(new XYChart.Data("Total", totalValuesCount));
@@ -42,15 +37,15 @@ public class NumericColumnStatistics extends ColumnStatistics {
             return;
         }
 
-        double threeSigma = stdDev * 3;
+        long threeSigma = stdDev * 3;
         long potentiallyWrongValuesCount = valuesByCount.entrySet().stream()
-                .filter(e -> Double.compare(e.getKey(), threeSigma) > 0).count();
+                .filter(e -> Double.compare(e.getKey().getTime(), threeSigma) > 0).count();
         recordCountData.getData().add(new XYChart.Data("Pot. Wrong", potentiallyWrongValuesCount));
 
-        List<XYChart.Data> data = valuesByCount.keySet().stream().sorted(new Comparator<Double>() {
+        List<XYChart.Data> data = valuesByCount.keySet().stream().sorted(new Comparator<Timestamp>() {
             @Override
-            public int compare(Double o1, Double o2) {
-                return Integer.compare(valuesByCount.get(o2), valuesByCount.get(o1));
+            public int compare(Timestamp t1, Timestamp t2) {
+                return Integer.compare(valuesByCount.get(t2), valuesByCount.get(t1));
             }
         }).limit(10).map(x -> new XYChart.Data(x.toString(), (int)valuesByCount.get(x))).collect(Collectors.toList());
 
@@ -60,19 +55,23 @@ public class NumericColumnStatistics extends ColumnStatistics {
         this.patternInformationData = Optional.of(patternInformatonDataValues);
     }
 
-    public Double getMinimumValue() {
+    public Timestamp getMinimumValue() {
         return minimumValue;
     }
 
-    public Double getMaximumValue() {
+    public Timestamp getMaximumValue() {
         return maximumValue;
     }
 
-    public Double getMean() { return mean; }
+    public Timestamp getMean() {
+        return mean;
+    }
 
-    public Double getStdDev() { return stdDev; }
+    public XYChart.Series getRecordCountData() {
+        return recordCountData;
+    }
 
-    public XYChart.Series getRecordCountData() { return recordCountData; }
-
-    public Optional<XYChart.Series> getPatternInformationData() { return patternInformationData; }
+    public Optional<XYChart.Series> getPatternInformationData() {
+        return patternInformationData;
+    }
 }

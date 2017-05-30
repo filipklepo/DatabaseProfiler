@@ -1,11 +1,11 @@
 package hr.fer.zavrad.dbprofiler.controller;
 
-import hr.fer.zavrad.dbprofiler.model.DateColumnStatistics;
+import hr.fer.zavrad.dbprofiler.model.TimeColumnStatistics;
 import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
 import javafx.scene.control.Label;
 
-public class DateColumnStatisticsController {
+public class TimeColumnStatisticsController {
 
     @FXML
     private BarChart bcPatternInformation;
@@ -23,9 +23,9 @@ public class DateColumnStatisticsController {
     private Label lblMeanValue;
 
 
-    private final DateColumnStatistics statistics;
+    private final TimeColumnStatistics statistics;
 
-    public DateColumnStatisticsController(DateColumnStatistics statistics) {
+    public TimeColumnStatisticsController(TimeColumnStatistics statistics) {
         this.statistics = statistics;
     }
 

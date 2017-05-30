@@ -25,12 +25,24 @@ public class TableColumn extends DatabaseObject {
         this.connection = connection;
 
         if(generateStatistics) {
-            if(Connections.isNumericColumn(this.columnType)) {
+            if (Connections.isNumericColumn(this.columnType)) {
                 this.statistics =
                         Statistics.generateNumericColumnStatistics(connection, tableName, columnName, this.columnType);
-            } else if(Connections.isTextualColumn(this.columnType)) {
+            } else if (Connections.isTextualColumn(this.columnType)) {
                 this.statistics =
                         Statistics.generateTextualColumnStatistics(connection, tableName, columnName, this.columnType);
+            } else if (this.columnType == TableColumnType.DATE) {
+                this.statistics =
+                        Statistics.generateDateColumnStatistics(connection, tableName, columnName, this.columnType);
+            } else if (this.columnType == TableColumnType.TIME) {
+                this.statistics =
+                        Statistics.generateTimeColumnStatistics(connection, tableName, columnName, this.columnType);
+            } else if(this.columnType == TableColumnType.TIMESTAMP) {
+                this.statistics =
+                        Statistics.generateTimestampColumnStatistics(connection, tableName, columnName, this.columnType);
+            } else {
+                this.statistics =
+                        Statistics.generateGenericColumnStatistics(connection, tableName, columnName, this.columnType);
             }
         }
     }
