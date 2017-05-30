@@ -73,23 +73,6 @@ public class DatabaseProfiler extends Application {
             }
         });
 
-//        connection =
-//                new ConnectionGenerator(
-//                        DatabaseType.POSTGRE,
-//                        "dvdrental",
-//                        "postgres",
-//                        "filip95").generate();
-//        FXMLLoader loader = new FXMLLoader();
-//        loader.setLocation(DatabaseProfiler.class.getResource("/view/DatabaseOverview.fxml"));
-//        DatabaseOverviewController overviewController = new DatabaseOverviewController(connection.get());
-//        loader.setController(overviewController);
-//
-//        Scene primaryScene = new Scene(loader.load(), WINDOW_WIDTH, WINDOW_HEIGHT);
-//        primaryScene.getStylesheets().add(
-//                DatabaseProfiler.class.getResource("/assets/database_overview.css").toExternalForm());
-//        primaryStage.setScene(primaryScene);
-//
-//        primaryStage.show();
     }
 
     public Stage getConnectStage() {
