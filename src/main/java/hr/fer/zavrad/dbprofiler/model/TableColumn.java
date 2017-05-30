@@ -1,6 +1,7 @@
 package hr.fer.zavrad.dbprofiler.model;
 
 import hr.fer.zavrad.dbprofiler.util.Connections;
+import hr.fer.zavrad.dbprofiler.util.Statistics;
 
 import java.sql.Connection;
 import java.util.Optional;
@@ -10,19 +11,28 @@ public class TableColumn extends DatabaseObject {
     private final String tableName;
     private final String columnName;
     private final TableColumnType columnType;
-    private Optional<NumericColumnStatistics> statistics;
+    private Optional<ColumnStatistics> statistics;
     private final Connection connection;
 
-    public TableColumn(String tableName, String columnName, int columnType, Connection connection) {
+    public TableColumn(String tableName, String columnName, int columnType, Connection connection,
+                       boolean generateStatistics) {
+
         super(DatabaseObjectType.COLUMN);
 
         this.tableName = tableName;
         this.columnName = columnName;
-        System.out.println(columnType);
         this.columnType = Connections.getColumnType(columnType).get();
         this.connection = connection;
 
-        this.statistics = Connections.generateNumericColumnStatistics(connection, tableName, columnName, this.columnType);
+        if(generateStatistics) {
+            if(Connections.isNumericColumn(this.columnType)) {
+                this.statistics =
+                        Statistics.generateNumericColumnStatistics(connection, tableName, columnName, this.columnType);
+            } else if(Connections.isTextualColumn(this.columnType)) {
+                this.statistics =
+                        Statistics.generateTextualColumnStatistics(connection, tableName, columnName, this.columnType);
+            }
+        }
     }
 
     public String getTableName() {
@@ -37,7 +47,9 @@ public class TableColumn extends DatabaseObject {
         return columnType;
     }
 
-
+    public Optional<ColumnStatistics> getStatistics() {
+        return statistics;
+    }
 
     @Override
     public String toString() {
