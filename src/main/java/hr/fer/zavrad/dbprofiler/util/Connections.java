@@ -12,6 +12,7 @@ import javafx.embed.swing.SwingNode;
 import javafx.scene.control.TreeItem;
 
 import javax.swing.*;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -25,8 +26,6 @@ import java.util.*;
  * @author Filip
  */
 public final class Connections {
-
-    private static final int QUERY_ROWS_LIMIT = 100_000;
 
     private static final Map<Integer, TableColumnType> COLUMN_TYPE;
 
@@ -67,6 +66,13 @@ public final class Connections {
                 tableColumnType == TableColumnType.FLOAT    ||
                 tableColumnType == TableColumnType.REAL     ||
                 tableColumnType == TableColumnType.DOUBLE;
+    }
+
+    public static boolean isTextualColumn(TableColumnType tableColumnType) {
+        return tableColumnType == TableColumnType.LONGVARCHAR ||
+                tableColumnType == TableColumnType.CHAR       ||
+                tableColumnType == TableColumnType.VARCHAR    ||
+                tableColumnType == TableColumnType.TEXT;
     }
 
     private Connections() {
@@ -120,7 +126,7 @@ public final class Connections {
         return foreignKeysByTables;
     }
 
-    public static void createDatabaseRelationshipDiagram(SwingNode swingNode, Connection connection){
+    public static void createDatabaseRelationshipDiagram(List<Table> tables, SwingNode swingNode, Connection connection){
 
         Map<String, List<String>> foreignKeysByTables = getForeignKeysByTables(connection);
 
@@ -141,24 +147,33 @@ public final class Connections {
         edgeStyle.put(mxConstants.STYLE_FONTCOLOR, "#446299");
         Map<String, Object> vertexStyle = new HashMap<String, Object>();
         vertexStyle.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_RECTANGLE);
+        vertexStyle.put(mxConstants.STYLE_EDITABLE, mxConstants.NONE);
 
         graph.getStylesheet().setDefaultEdgeStyle(edgeStyle);
 
         Map<String, Object> vertexMap = new HashMap<>();
         try {
             int i = 0;
-            for(String tableName : foreignKeysByTables.keySet()){
+            for(Table table : tables){
+                String[] lines = table.toString().split(System.lineSeparator());
+                int longestLineLength = Arrays.stream(lines).mapToInt(String::length).max().getAsInt();
+
                 Object vertex = graph.insertVertex(
-                        parent, null, tableName, i, i, 150,50,"swimlane;rounded=1;");
-                vertexMap.put(tableName, vertex);
+                        parent, null, table, i, i, longestLineLength * 7,
+                        lines.length * 15,"swimlane;rounded=1;");
+                vertexMap.put(table.getName(), vertex);
             }
 
-            for(String tableName : foreignKeysByTables.keySet()){
-                if(Objects.nonNull(foreignKeysByTables.get(tableName))){
+            for(Table table : tables){
+                if(Objects.nonNull(foreignKeysByTables.get(table.getName()))){
 
-                    for(String referencedTable : foreignKeysByTables.get(tableName)){
+                    for(String referencedTable : foreignKeysByTables.get(table.getName())){
+                        if(!tables.stream().filter(t -> t.getName().equals(referencedTable)).findAny().isPresent()) {
+                            continue;
+                        }
+
                         graph.insertEdge(
-                                parent, null, "", vertexMap.get(tableName), vertexMap.get(referencedTable));
+                                parent, null, "", vertexMap.get(table.getName()), vertexMap.get(referencedTable));
                     }
                 }
             }
@@ -168,6 +183,9 @@ public final class Connections {
         }
 
         graph.setCellsEditable(false);
+        graph.setCellsMovable(false);
+        graph.setEdgeLabelsMovable(false);
+        graph.setCellsMovable(false);
 
         new mxHierarchicalLayout(graph).execute(graph.getDefaultParent());
         new mxParallelEdgeLayout(graph).execute(graph.getDefaultParent());
@@ -182,11 +200,11 @@ public final class Connections {
         });
     }
 
-    public static TreeItem getDatabaseSchema(Connection connection) {
-        TreeItem<DatabaseObject> rootItem = new TreeItem("Database");
-        rootItem.setExpanded(true);
-
+    public static Optional<TreeItem> getDatabaseSchema(Connection connection) {
         try {
+            TreeItem<DatabaseObject> rootItem = new TreeItem(connection.getCatalog());
+            rootItem.setExpanded(true);
+
             for(String table : getTableNames(connection)) {
                 TreeItem<DatabaseObject> tableItem = new TreeItem(new Table(table));
                 rootItem.getChildren().add(tableItem);
@@ -201,56 +219,15 @@ public final class Connections {
                                 new TreeItem<>(new TableColumn(table,
                                                 resultSet.getMetaData().getColumnName(i),
                                                 resultSet.getMetaData().getColumnType(i),
-                                                connection));
+                                                connection,
+                                                true));
 
                         tableItem.getChildren().add(columnItem);
                     }
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
 
-        return rootItem;
-    }
-
-    public static Optional<NumericColumnStatistics> generateNumericColumnStatistics(
-            Connection connection, String tableName, String columnName, TableColumnType columnType) {
-
-        if(!Connections.isNumericColumn(columnType)) {
-            return Optional.empty();
-        }
-
-        String query = String.format("SELECT %s FROM %s LIMIT %d", columnName, tableName, QUERY_ROWS_LIMIT);
-        try {
-            Integer totalValues = 0;
-            Integer nullValues = 0;
-            Double minimumValue = Double.MAX_VALUE;
-            Double maximumValue = Double.MIN_VALUE;
-            Map<Double, Integer> valuesByCount = new HashMap<>();
-
-            ResultSet resultSet = connection.createStatement().executeQuery(query);
-
-            while(resultSet.next()) {
-                Double result = resultSet.getDouble(columnName);
-                totalValues++;
-
-                if(Objects.isNull(result)) {
-                    nullValues++;
-                    continue;
-                }
-
-                valuesByCount.put(result, valuesByCount.getOrDefault(result, 0) + 1);
-                if(Double.compare(result, minimumValue) < 0) {
-                    minimumValue = result;
-                } else if(Double.compare(result, maximumValue) > 0) {
-                    maximumValue = result;
-                }
-            }
-            resultSet.close();
-
-            return Optional.of(
-                    new NumericColumnStatistics(totalValues, nullValues, minimumValue, maximumValue, valuesByCount));
+            return Optional.of(rootItem);
         } catch (SQLException e) {
             e.printStackTrace();
             return Optional.empty();

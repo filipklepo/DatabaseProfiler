@@ -45,24 +45,21 @@
                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                        </columnConstraints>
                        <rowConstraints>
-                           <RowConstraints maxHeight="27.0" minHeight="26.0" prefHeight="27.0" vgrow="SOMETIMES" />
+                           <RowConstraints maxHeight="34.0" minHeight="26.0" prefHeight="34.0" vgrow="SOMETIMES" />
                            <RowConstraints maxHeight="44.0" minHeight="10.0" prefHeight="37.0" vgrow="SOMETIMES" />
                            <RowConstraints maxHeight="38.0" minHeight="10.0" prefHeight="32.0" vgrow="SOMETIMES" />
-                           <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                        </rowConstraints>
                        <children>
-                           <Label text="Max Value:" GridPane.rowIndex="1">
+                           <Label text="Max Length:" GridPane.rowIndex="1">
                                <GridPane.margin>
                                    <Insets />
                                </GridPane.margin>
                            </Label>
-                           <Label text="Min Value:" />
-                           <Label fx:id="lblMinValue" text="MIN_VALUE" GridPane.columnIndex="1" />
-                           <Label fx:id="lblMaxValue" text="MAX_VALUE" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                           <Label fx:id="lblMean" text="Mean:" GridPane.rowIndex="2" />
-                           <Label fx:id="lblStdDev" text="Standard Deviation:" GridPane.rowIndex="3" />
-                           <Label fx:id="lblMeanValue" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                           <Label fx:id="lblStdDevValue" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                           <Label text="Min Length:" />
+                           <Label fx:id="lblMinLength" text="MIN_LEN" GridPane.columnIndex="1" />
+                           <Label fx:id="lblMaxLength" text="MAX_LEN" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                           <Label fx:id="lblMean" text="Average Length:" GridPane.rowIndex="2" />
+                           <Label fx:id="lblAverageLength" text="AVG_LEN" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                        </children>
                        <padding>
                            <Insets top="5.0" />

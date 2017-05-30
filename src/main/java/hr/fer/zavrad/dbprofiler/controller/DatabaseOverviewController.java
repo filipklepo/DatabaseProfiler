@@ -1,23 +1,23 @@
 package hr.fer.zavrad.dbprofiler.controller;
 
-import hr.fer.zavrad.dbprofiler.model.DatabaseObject;
-import hr.fer.zavrad.dbprofiler.model.DatabaseObjectType;
-import hr.fer.zavrad.dbprofiler.model.TableColumn;
+import hr.fer.zavrad.dbprofiler.model.*;
 import hr.fer.zavrad.dbprofiler.util.Connections;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.embed.swing.SwingNode;
+import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.sql.*;
 import java.util.Objects;
 
@@ -29,65 +29,26 @@ public class DatabaseOverviewController {
 
     @FXML
     private TreeView<DatabaseObject> tvTables;
-
     @FXML
-    private TableView tvContent;
-
+    private Button btnRelationalDiagram;
     @FXML
-    private Button btnDatabaseDiagram;
+    private VBox vbStatistics;
 
     public DatabaseOverviewController(Connection connection) {
         this.connection = connection;
     }
 
     public void initialize() {
-//        lvTables.setItems(getTableNames(connection));
-//
-//        lvTables.setOnMouseClicked(new EventHandler<MouseEvent>() {
-//
-//            @Override
-//            public void handle(MouseEvent event) {
-//                String selectedTable = tvTables.getSelectionModel().getSelectedItem().getValue();
-//                String query = String.format("SELECT * FROM %s LIMIT 10", selectedTable);
-//                tvContent.getItems().clear();
-//                tvContent.getColumns().clear();
-//
-//                try {
-//                    ResultSet resultSet = connection.createStatement().executeQuery(query);
-//
-//                    for(int i = 0, length = resultSet.getMetaData().getColumnCount(); i < length; ++i) {
-//                        TableColumn column = new TableColumn(resultSet.getMetaData().getColumnName(i + 1));
-//
-//                        final int j = i;
-//                        column.setCellValueFactory(
-//                                new Callback<TableColumn.CellDataFeatures<ObservableList,String>,ObservableValue<String>>(){
-//
-//                                    public ObservableValue<String> call(TableColumn.CellDataFeatures<ObservableList, String> param) {
-//                                        return new SimpleStringProperty(param.getValue().get(j).toString());
-//                                    }
-//                        });
-//
-//                        tvContent.getColumns().add(column);
-//                    }
-//
-//                    ObservableList<ObservableList> tableData = FXCollections.observableArrayList();
-//                    while(resultSet.next()) {
-//                        ObservableList<String> row = FXCollections.observableArrayList();
-//
-//                        for(int i = 1, length = resultSet.getMetaData().getColumnCount(); i <= length; ++i) {
-//                            row.add(resultSet.getString(i) != null ? resultSet.getString(i) : NULL);
-//                        }
-//
-//                        tableData.add(row);
-//                    }
-//                    resultSet.close();
-//
-//                    tvContent.setItems(tableData);
-//                } catch (SQLException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        });
+        final Task<Void> task = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                Platform.runLater(() -> {
+                        tvTables.setRoot(Connections.getDatabaseSchema(connection).get());
+                });
+                return null;
+            }
+        };
+        new Thread(task).start();
 
         tvTables.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem<DatabaseObject>>() {
             @Override
@@ -95,33 +56,79 @@ public class DatabaseOverviewController {
                                 TreeItem<DatabaseObject> oldValue, TreeItem<DatabaseObject> newValue) {
                 if(Objects.isNull(newValue)) return;
 
+                vbStatistics.getChildren().clear();
+                DatabaseObject object = newValue.getValue();
+                if(object.getType() == DatabaseObjectType.COLUMN) {
 
+                    TableColumn column = (TableColumn) object;
 
-                DatabaseObject item = tvTables.getSelectionModel().getSelectedItem().getValue();
-                if(item.getType() == DatabaseObjectType.COLUMN) {
-                    System.out.println(((TableColumn)item).getColumnName());
-                    System.out.println(Connections.isNumericColumn(((TableColumn)item).getColumnType()));
+                    GridPane columnstatistics = null;
+
+                    FXMLLoader loader = new FXMLLoader();
+                    if(Connections.isNumericColumn(column.getColumnType())) {
+                        loader.setLocation(
+                                DatabaseOverviewController.class.getResource(
+                                        "/view/NumericColumnStatistics.fxml"));
+                        NumericColumnStatisticsController controller =
+                                new NumericColumnStatisticsController((NumericColumnStatistics) column.getStatistics().get());
+                        loader.setController(controller);
+
+                    } else if(Connections.isTextualColumn(column.getColumnType())) {
+                        loader.setLocation(
+                                DatabaseOverviewController.class.getResource(
+                                        "/view/TextualColumnStatistics.fxml"));
+                        TextualColumnStatisticsController controller =
+                                new TextualColumnStatisticsController((TextualColumnStatistics) column.getStatistics().get());
+                        loader.setController(controller);
+
+                    } else {
+                        return;
+                    }
+
+                    try {
+                        columnstatistics = loader.load();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    vbStatistics.getChildren().add(columnstatistics);
                 }
             }
         });
 
-        btnDatabaseDiagram.setOnMousePressed(new EventHandler<MouseEvent>() {
+        btnRelationalDiagram.setOnMousePressed(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                final SwingNode swingNode = new SwingNode();
+//                final SwingNode swingNode = new SwingNode();
+//
+//                Connections.createDatabaseRelationshipDiagram(swingNode, connection);
+//
+//                StackPane pane = new StackPane();
+//                pane.getChildren().add(swingNode);
+//
+//                Stage stage = new Stage();
+//                stage.setTitle("Database relationship diagram");
+//                stage.setScene(new Scene(pane, 800, 600));
+//                stage.show();
 
-                Connections.createDatabaseRelationshipDiagram(swingNode, connection);
+                Pane pane = null;
 
-                StackPane pane = new StackPane();
-                pane.getChildren().add(swingNode);
+                FXMLLoader loader = new FXMLLoader();
+                loader.setLocation(
+                        DatabaseOverviewController.class.getResource("/view/RelationalDiagramDefiner.fxml"));
+                loader.setController(new RelationalDiagramController(connection));
 
+                try {
+                    pane = loader.load();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                Scene scene = new Scene(pane);
                 Stage stage = new Stage();
-                stage.setTitle("Database relationship diagram");
-                stage.setScene(new Scene(pane, 800, 600));
+                stage.setScene(scene);
                 stage.show();
             }
         });
-
-
     }
 }

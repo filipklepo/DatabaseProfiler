@@ -1,16 +1,12 @@
 package hr.fer.zavrad.dbprofiler;
 
-import hr.fer.zavrad.dbprofiler.controller.ConnectController;
 import hr.fer.zavrad.dbprofiler.controller.DatabaseOverviewController;
 import hr.fer.zavrad.dbprofiler.model.DatabaseType;
 import hr.fer.zavrad.dbprofiler.util.ConnectionGenerator;
 import javafx.application.Application;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 import java.sql.*;
@@ -19,13 +15,11 @@ import java.util.Optional;
 public class DatabaseProfiler extends Application {
 
     private static final String WINDOW_TITLE = "Database Profiler";
-    private static final int WIDTH = 1024;
-    private static final int HEIGHT = 768;
+    private static final int WINDOW_WIDTH = 1024;
+    private static final int WINDOW_HEIGHT = 768;
 
     private Stage primaryStage;
     private Stage connectStage;
-    private AnchorPane connectLayout;
-    private AnchorPane databaseOverviewLayout;
 
     private Optional<Connection> connection;
 
@@ -43,14 +37,13 @@ public class DatabaseProfiler extends Application {
     }
 
     private void initRootLayout() throws IOException {
-//        FXMLLoader loader = new FXMLLoader();
-//        loader.setLocation(DatabaseProfiler.class.getResource("/view/Connect.fxml"));
+//        FXMLLoader connectLoader = new FXMLLoader();
+//        connectLoader.setLocation(DatabaseProfiler.class.getResource("/view/Connect.fxml"));
 //        ConnectController connectController = new ConnectController(this);
-//        loader.setController(connectController);
-//        connectLayout = loader.load();
+//        connectLoader.setController(connectController);
 //
-//        Scene scene = new Scene(connectLayout);
-//        connectStage.setScene(scene);
+//        Scene connectScene = new Scene(connectLoader.load());
+//        connectStage.setScene(connectScene);
 //        connectStage.show();
 //        connectStage.setOnHidden(new EventHandler<WindowEvent>() {
 //
@@ -64,17 +57,15 @@ public class DatabaseProfiler extends Application {
 //                    loader.setController(overviewController);
 //
 //                    try {
-//                        databaseOverviewLayout = loader.load();
+//                        Scene scene = new Scene(loader.load(), WINDOW_WIDTH, WINDOW_HEIGHT);
+//                        scene.getStylesheets().add(
+//                                DatabaseProfiler.class.getResource("/assets/database_overview.css").toExternalForm());
+//
+//                        primaryStage.setScene(scene);
+//                        primaryStage.show();
 //                    } catch (IOException e) {
 //                        e.printStackTrace();
 //                    }
-//
-//                    Scene scene = new Scene(databaseOverviewLayout, WIDTH, HEIGHT);
-//                    scene.getStylesheets().add(
-//                            DatabaseProfiler.class.getResource("/assets/database_overview.css").toExternalForm());
-//                    primaryStage.setScene(scene);
-//
-//                    primaryStage.show();
 //                }
 //            }
 //        });
@@ -90,16 +81,10 @@ public class DatabaseProfiler extends Application {
         DatabaseOverviewController overviewController = new DatabaseOverviewController(connection.get());
         loader.setController(overviewController);
 
-        try {
-            databaseOverviewLayout = loader.load();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        Scene scene = new Scene(databaseOverviewLayout, WIDTH, HEIGHT);
-        scene.getStylesheets().add(
+        Scene primaryScene = new Scene(loader.load(), WINDOW_WIDTH, WINDOW_HEIGHT);
+        primaryScene.getStylesheets().add(
                 DatabaseProfiler.class.getResource("/assets/database_overview.css").toExternalForm());
-        primaryStage.setScene(scene);
+        primaryStage.setScene(primaryScene);
 
         primaryStage.show();
     }
