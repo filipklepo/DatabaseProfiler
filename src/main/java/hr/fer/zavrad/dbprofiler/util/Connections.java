@@ -205,18 +205,20 @@ public final class Connections {
             TreeItem<DatabaseObject> rootItem = new TreeItem(connection.getCatalog());
             rootItem.setExpanded(true);
 
-            for(String table : getTableNames(connection)) {
-                TreeItem<DatabaseObject> tableItem = new TreeItem(new Table(table));
+            for(String tableName : getTableNames(connection)) {
+                Table table = new Table(connection, tableName, true);
+                table.setShowRowsCount(true);
+                TreeItem<DatabaseObject> tableItem = new TreeItem(table);
                 rootItem.getChildren().add(tableItem);
 
                 ResultSet resultSet = connection.createStatement()
-                                                .executeQuery("SELECT * FROM " + table + " LIMIT 1");
+                                                .executeQuery("SELECT * FROM " + table.getName() + " LIMIT 1");
 
                 while(resultSet.next()) {
                     for(int i = 1, length = resultSet.getMetaData().getColumnCount(); i <= length; ++i) {
 
                         TreeItem<DatabaseObject> columnItem =
-                                new TreeItem<>(new TableColumn(table,
+                                new TreeItem<>(new TableColumn(tableName,
                                                 resultSet.getMetaData().getColumnName(i),
                                                 resultSet.getMetaData().getColumnType(i),
                                                 connection,

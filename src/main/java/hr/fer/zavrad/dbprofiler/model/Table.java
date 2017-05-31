@@ -10,15 +10,18 @@ public class Table extends DatabaseObject {
 
     private final String name;
     private Optional<String> representationWithColumns;
+    private Optional<String> representationWithRowsCount;
     private boolean showAttributes;
+    private boolean showRowsCount;
 
     public Table(String name) {
         super(DatabaseObjectType.TABLE);
         this.name = name;
         this.representationWithColumns = Optional.empty();
+        this.representationWithRowsCount = Optional.empty();
     }
 
-    public Table(Connection connection, String name) {
+    public Table(Connection connection, String name, boolean rowCountRepresentation) {
         this(name);
 
         StringJoiner joiner = new StringJoiner(System.lineSeparator());
@@ -27,8 +30,8 @@ public class Table extends DatabaseObject {
             resultSet = connection.createStatement()
                     .executeQuery("SELECT * FROM " + name + " LIMIT 1");
 
-            while(resultSet.next()) {
-                for(int i = 1, length = resultSet.getMetaData().getColumnCount(); i <= length; ++i) {
+            while (resultSet.next()) {
+                for (int i = 1, length = resultSet.getMetaData().getColumnCount(); i <= length; ++i) {
 
                     joiner.add(new TableColumn(name, resultSet.getMetaData().getColumnName(i),
                             resultSet.getMetaData().getColumnType(i),
@@ -37,15 +40,46 @@ public class Table extends DatabaseObject {
                 }
             }
 
+            this.representationWithColumns = Optional.of(String.format("%s%n%n%s", this.name, joiner.toString()));
+            this.representationWithRowsCount = Optional.empty();
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            this.representationWithColumns = Optional.empty();
+            this.representationWithRowsCount = Optional.empty();
         }
 
-        this.representationWithColumns = Optional.of(String.format("%s%n%n%s", this.name, joiner.toString()));
+        if(rowCountRepresentation) {
+
+            ResultSet rowCountResultSet = null;
+            try {
+                int rowsCount = 0;
+
+                rowCountResultSet = connection.createStatement()
+                        .executeQuery("SELECT COUNT(*) AS COUNT FROM " + name);
+
+                while (rowCountResultSet.next()) {
+                    rowsCount = rowCountResultSet.getInt("COUNT");
+                    break;
+                }
+
+                this.representationWithRowsCount = Optional.of(String.format("%s (%d rows)", this.name, rowsCount));
+                this.representationWithColumns = Optional.empty();
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+
+                this.representationWithColumns = Optional.empty();
+                this.representationWithRowsCount = Optional.empty();
+            }
+        }
     }
 
     public void setShowAttributes(boolean showAttributes) {
         this.showAttributes = showAttributes;
+    }
+
+    public void setShowRowsCount(boolean showRowsCount) {
+        this.showRowsCount = showRowsCount;
     }
 
     public String getName() {
@@ -54,6 +88,13 @@ public class Table extends DatabaseObject {
 
     @Override
     public String toString() {
-        return representationWithColumns.isPresent() && showAttributes ? representationWithColumns.get() : name;
+        if(representationWithRowsCount.isPresent() && showRowsCount) {
+            return representationWithRowsCount.get();
+        }
+        if(representationWithColumns.isPresent() && showAttributes) {
+            return representationWithColumns.get();
+        }
+
+        return this.getName();
     }
 }
