@@ -13,27 +13,21 @@ public class NumericColumnStatistics extends ColumnStatistics {
 
     private final Double minimumValue;
     private final Double maximumValue;
-    private final Integer totalValuesCount;
-    private final Integer nullValuesCount;
     private final Double mean;
     private final Double stdDev;
     private final XYChart.Series recordCountData;
     private final Optional<XYChart.Series> patternInformationData;
 
-    public NumericColumnStatistics(Integer totalValuesCount, Integer nullValuesCount, Double minimumValue,
+    public NumericColumnStatistics(Integer nullValuesCount, Double minimumValue,
                                    Double maximumValue, Map<Double, Integer> valuesByCount, Double mean, Double stdDev) {
         this.minimumValue = minimumValue;
         this.maximumValue = maximumValue;
-        this.totalValuesCount = totalValuesCount;
-        this.nullValuesCount = nullValuesCount;
         this.mean = mean;
         this.stdDev = stdDev;
 
         long patternValuesCount = valuesByCount.entrySet().stream().filter(e -> e.getValue() > 1).count();
 
-
         recordCountData = new XYChart.Series();
-        recordCountData.getData().add(new XYChart.Data("Total", totalValuesCount));
         recordCountData.getData().add(new XYChart.Data("Null", nullValuesCount));
         recordCountData.getData().add(new XYChart.Data("Pattern", patternValuesCount));
 

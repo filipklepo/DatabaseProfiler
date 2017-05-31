@@ -40,39 +40,56 @@ public class DatabaseProfiler extends Application {
     }
 
     private void initRootLayout() throws IOException {
-        FXMLLoader connectLoader = new FXMLLoader();
-        connectLoader.setLocation(DatabaseProfiler.class.getResource("/view/Connect.fxml"));
-        ConnectController connectController = new ConnectController(this);
-        connectLoader.setController(connectController);
+//        FXMLLoader connectLoader = new FXMLLoader();
+//        connectLoader.setLocation(DatabaseProfiler.class.getResource("/view/Connect.fxml"));
+//        ConnectController connectController = new ConnectController(this);
+//        connectLoader.setController(connectController);
+//
+//        Scene connectScene = new Scene(connectLoader.load());
+//        connectStage.setScene(connectScene);
+//        connectStage.show();
+//        connectStage.setOnHidden(new EventHandler<WindowEvent>() {
+//
+//            @Override
+//            public void handle(WindowEvent event) {
+//
+//                if(connection.isPresent()) {
+//                    FXMLLoader loader = new FXMLLoader();
+//                    loader.setLocation(DatabaseProfiler.class.getResource("/view/DatabaseOverview.fxml"));
+//                    DatabaseOverviewController overviewController = new DatabaseOverviewController(connection.get());
+//                    loader.setController(overviewController);
+//
+//                    try {
+//                        Scene scene = new Scene(loader.load(), WINDOW_WIDTH, WINDOW_HEIGHT);
+//                        scene.getStylesheets().add(
+//                                DatabaseProfiler.class.getResource("/assets/database_overview.css").toExternalForm());
+//
+//                        primaryStage.setScene(scene);
+//                        primaryStage.show();
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+//        });
 
-        Scene connectScene = new Scene(connectLoader.load());
-        connectStage.setScene(connectScene);
-        connectStage.show();
-        connectStage.setOnHidden(new EventHandler<WindowEvent>() {
+        connection =
+                new ConnectionGenerator(
+                        DatabaseType.POSTGRE,
+                        "dvdrental",
+                        "postgres",
+                        "filip95").generate();
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(DatabaseProfiler.class.getResource("/view/DatabaseOverview.fxml"));
+        DatabaseOverviewController overviewController = new DatabaseOverviewController(connection.get());
+        loader.setController(overviewController);
 
-            @Override
-            public void handle(WindowEvent event) {
+        Scene primaryScene = new Scene(loader.load(), WINDOW_WIDTH, WINDOW_HEIGHT);
+        primaryScene.getStylesheets().add(
+                DatabaseProfiler.class.getResource("/assets/database_overview.css").toExternalForm());
+        primaryStage.setScene(primaryScene);
 
-                if(connection.isPresent()) {
-                    FXMLLoader loader = new FXMLLoader();
-                    loader.setLocation(DatabaseProfiler.class.getResource("/view/DatabaseOverview.fxml"));
-                    DatabaseOverviewController overviewController = new DatabaseOverviewController(connection.get());
-                    loader.setController(overviewController);
-
-                    try {
-                        Scene scene = new Scene(loader.load(), WINDOW_WIDTH, WINDOW_HEIGHT);
-                        scene.getStylesheets().add(
-                                DatabaseProfiler.class.getResource("/assets/database_overview.css").toExternalForm());
-
-                        primaryStage.setScene(scene);
-                        primaryStage.show();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
-
+        primaryStage.show();
     }
 
     public Stage getConnectStage() {

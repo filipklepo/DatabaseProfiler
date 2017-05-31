@@ -6,9 +6,8 @@ public class GenericColumnStatistics extends ColumnStatistics{
 
     private final XYChart.Series recordCountData;
 
-    public GenericColumnStatistics(Integer totalValuesCount, Integer nullValuesCount) {
+    public GenericColumnStatistics(Integer nullValuesCount) {
         recordCountData = new XYChart.Series();
-        recordCountData.getData().add(new XYChart.Data("Total", totalValuesCount));
         recordCountData.getData().add(new XYChart.Data("Null", nullValuesCount));
     }
 

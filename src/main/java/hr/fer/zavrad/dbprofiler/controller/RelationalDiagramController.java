@@ -42,7 +42,7 @@ public class RelationalDiagramController {
 
         lvTables.setItems(
                 FXCollections.observableArrayList(
-                        Connections.getTableNames(connection).stream().map(t -> new Table(connection, t))
+                        Connections.getTableNames(connection).stream().map(t -> new Table(connection, t, false))
                                                                       .collect(Collectors.toList())));
 
         btnSelectAll.setOnMouseClicked(new EventHandler<MouseEvent>() {

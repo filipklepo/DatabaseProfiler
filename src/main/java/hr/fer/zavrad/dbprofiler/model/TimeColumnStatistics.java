@@ -18,7 +18,7 @@ public class TimeColumnStatistics extends ColumnStatistics {
     private final XYChart.Series recordCountData;
     private final Optional<XYChart.Series> patternInformationData;
 
-    public TimeColumnStatistics(Integer totalValuesCount, Integer nullValuesCount, Time minimumValue,
+    public TimeColumnStatistics(Integer nullValuesCount, Time minimumValue,
                                      Time maximumValue, Time mean, Long stdDev,
                                      Map<Time, Integer> valuesByCount) {
 
@@ -29,7 +29,6 @@ public class TimeColumnStatistics extends ColumnStatistics {
         long patternValuesCount = valuesByCount.entrySet().stream().filter(e -> e.getValue() > 1).count();
 
         recordCountData = new XYChart.Series();
-        recordCountData.getData().add(new XYChart.Data("Total", totalValuesCount));
         recordCountData.getData().add(new XYChart.Data("Null", nullValuesCount));
         recordCountData.getData().add(new XYChart.Data("Pattern", patternValuesCount));
 
@@ -56,9 +55,7 @@ public class TimeColumnStatistics extends ColumnStatistics {
         this.patternInformationData = Optional.of(patternInformatonDataValues);
     }
 
-    public Time getMinimumValue() {
-        return minimumValue;
-    }
+    public Time getMinimumValue() { return minimumValue; }
 
     public Time getMaximumValue() {
         return maximumValue;

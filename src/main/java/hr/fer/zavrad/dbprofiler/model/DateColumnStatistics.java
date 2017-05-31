@@ -17,7 +17,7 @@ public class DateColumnStatistics extends ColumnStatistics {
     private final XYChart.Series recordCountData;
     private final Optional<XYChart.Series> patternInformationData;
 
-    public DateColumnStatistics(Integer totalValuesCount, Integer nullValuesCount, Date minimumValue, Date maximumValue,
+    public DateColumnStatistics(Integer nullValuesCount, Date minimumValue, Date maximumValue,
                                 Date mean, Long stdDev, Map<Date, Integer> valuesByCount) {
 
         this.minimumValue = minimumValue;
@@ -27,9 +27,8 @@ public class DateColumnStatistics extends ColumnStatistics {
         long patternValuesCount = valuesByCount.entrySet().stream().filter(e -> e.getValue() > 1).count();
 
         recordCountData = new XYChart.Series();
-        recordCountData.getData().add(new XYChart.Data("Total", totalValuesCount));
         recordCountData.getData().add(new XYChart.Data("Null", nullValuesCount));
-        recordCountData.getData().add(new XYChart.Data("Pattern", patternValuesCount));
+        recordCountData.getData().add(new XYChart.Data("Distinct", patternValuesCount));
 
         if(patternValuesCount < 5) {
             patternInformationData = Optional.empty();

@@ -75,7 +75,7 @@ public final class Statistics {
             stdDevResultSet.close();
 
             return Optional.of(
-                    new NumericColumnStatistics(totalValues, nullValues, minimumValue, maximumValue, valuesByCount,
+                    new NumericColumnStatistics(nullValues, minimumValue, maximumValue, valuesByCount,
                             mean, Math.sqrt(bdStdDev.divide(
                                     BigDecimal.valueOf(
                                             totalValues - nullValues), 3, BigDecimal.ROUND_HALF_UP).doubleValue())));
@@ -126,8 +126,7 @@ public final class Statistics {
             resultSet.close();
 
             return Optional.of(
-                    new TextualColumnStatistics(totalValues,
-                                                nullValues,
+                    new TextualColumnStatistics(nullValues,
                                                 minimumLength,
                                                 maximumLength,
                                                 averageLength.divide(
@@ -189,6 +188,10 @@ public final class Statistics {
             while(stdDevResultSet.next()) {
                 Date result = stdDevResultSet.getDate(columnName);
 
+                if(Objects.isNull(result)) {
+                    continue;
+                }
+
                 bdStdDev = bdStdDev.add(BigDecimal.valueOf(Math.pow(result.getTime() - mean, 2.0)));
             }
             stdDevResultSet.close();
@@ -198,7 +201,7 @@ public final class Statistics {
                             totalValues - nullValues), 3, BigDecimal.ROUND_HALF_UP).doubleValue())).longValue();
 
             return Optional.of(
-                    new DateColumnStatistics(totalValues, nullValues, new Date(minimumValue),
+                    new DateColumnStatistics(nullValues, new Date(minimumValue),
                                              new Date(maximumValue), new Date(mean), stdDev, valuesByCount));
         } catch (SQLException e) {
             e.printStackTrace();
@@ -253,6 +256,10 @@ public final class Statistics {
             while (stdDevResultSet.next()) {
                 Date result = stdDevResultSet.getDate(columnName);
 
+                if(Objects.isNull(result)) {
+                    continue;
+                }
+
                 bdStdDev = bdStdDev.add(BigDecimal.valueOf(Math.pow(result.getTime() - mean, 2.0)));
             }
             stdDevResultSet.close();
@@ -262,7 +269,7 @@ public final class Statistics {
                             totalValues - nullValues), 3, BigDecimal.ROUND_HALF_UP).doubleValue())).longValue();
 
             return Optional.of(
-                    new TimeColumnStatistics(totalValues, nullValues, new Time(minimumValue),
+                    new TimeColumnStatistics(nullValues, new Time(minimumValue),
                             new Time(maximumValue), new Time(mean), stdDev, valuesByCount));
         } catch (SQLException e) {
             e.printStackTrace();
@@ -316,6 +323,7 @@ public final class Statistics {
 
                 while (stdDevResultSet.next()) {
                     Timestamp result = stdDevResultSet.getTimestamp(columnName);
+
                     if(Objects.isNull(result)) {
                         continue;
                     }
@@ -329,7 +337,7 @@ public final class Statistics {
                                 totalValues - nullValues), 3, BigDecimal.ROUND_HALF_UP).doubleValue())).longValue();
 
                 return Optional.of(
-                        new TimestampColumnStatistics(totalValues, nullValues, new Timestamp(minimumValue),
+                        new TimestampColumnStatistics(nullValues, new Timestamp(minimumValue),
                                 new Timestamp(maximumValue), new Timestamp(mean), stdDev, valuesByCount));
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -357,7 +365,7 @@ public final class Statistics {
                 }
 
                 return Optional.of(
-                        new GenericColumnStatistics(totalValues, nullValues));
+                        new GenericColumnStatistics(nullValues));
             } catch (SQLException e) {
 
                 e.printStackTrace();

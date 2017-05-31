@@ -17,7 +17,7 @@ public class TimestampColumnStatistics extends ColumnStatistics {
     private final XYChart.Series recordCountData;
     private final Optional<XYChart.Series> patternInformationData;
 
-    public TimestampColumnStatistics(Integer totalValuesCount, Integer nullValuesCount, Timestamp minimumValue,
+    public TimestampColumnStatistics(Integer nullValuesCount, Timestamp minimumValue,
                                      Timestamp maximumValue, Timestamp mean, Long stdDev,
                                      Map<Timestamp, Integer> valuesByCount) {
 
@@ -28,7 +28,6 @@ public class TimestampColumnStatistics extends ColumnStatistics {
         long patternValuesCount = valuesByCount.entrySet().stream().filter(e -> e.getValue() > 1).count();
 
         recordCountData = new XYChart.Series();
-        recordCountData.getData().add(new XYChart.Data("Total", totalValuesCount));
         recordCountData.getData().add(new XYChart.Data("Null", nullValuesCount));
         recordCountData.getData().add(new XYChart.Data("Pattern", patternValuesCount));
 

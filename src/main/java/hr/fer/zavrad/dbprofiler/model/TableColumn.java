@@ -6,7 +6,7 @@ import hr.fer.zavrad.dbprofiler.util.Statistics;
 import java.sql.Connection;
 import java.util.Optional;
 
-public class TableColumn extends DatabaseObject {
+public class TableColumn extends ProfilerObject {
 
     private final String tableName;
     private final String columnName;
@@ -17,7 +17,7 @@ public class TableColumn extends DatabaseObject {
     public TableColumn(String tableName, String columnName, int columnType, Connection connection,
                        boolean generateStatistics) {
 
-        super(DatabaseObjectType.COLUMN);
+        super(ProfilerObjectType.COLUMN);
 
         this.tableName = tableName;
         this.columnName = columnName;

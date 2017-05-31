@@ -3,15 +3,15 @@ package hr.fer.zavrad.dbprofiler.model;
 /**
  * Created by filip on 11.05.17..
  */
-public class DatabaseObject {
+public class ProfilerObject {
 
-    private final DatabaseObjectType type;
+    private final ProfilerObjectType type;
 
-    public DatabaseObject(DatabaseObjectType type) {
+    public ProfilerObject(ProfilerObjectType type) {
         this.type = type;
     }
 
-    public DatabaseObjectType getType() {
+    public ProfilerObjectType getType() {
         return type;
     }
 }

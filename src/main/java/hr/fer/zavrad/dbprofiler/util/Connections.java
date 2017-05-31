@@ -12,7 +12,6 @@ import javafx.embed.swing.SwingNode;
 import javafx.scene.control.TreeItem;
 
 import javax.swing.*;
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -202,13 +201,13 @@ public final class Connections {
 
     public static Optional<TreeItem> getDatabaseSchema(Connection connection) {
         try {
-            TreeItem<DatabaseObject> rootItem = new TreeItem(connection.getCatalog());
+            TreeItem<ProfilerObject> rootItem = new TreeItem(new Database(connection.getCatalog()));
             rootItem.setExpanded(true);
 
             for(String tableName : getTableNames(connection)) {
                 Table table = new Table(connection, tableName, true);
                 table.setShowRowsCount(true);
-                TreeItem<DatabaseObject> tableItem = new TreeItem(table);
+                TreeItem<ProfilerObject> tableItem = new TreeItem(table);
                 rootItem.getChildren().add(tableItem);
 
                 ResultSet resultSet = connection.createStatement()
@@ -217,7 +216,7 @@ public final class Connections {
                 while(resultSet.next()) {
                     for(int i = 1, length = resultSet.getMetaData().getColumnCount(); i <= length; ++i) {
 
-                        TreeItem<DatabaseObject> columnItem =
+                        TreeItem<ProfilerObject> columnItem =
                                 new TreeItem<>(new TableColumn(tableName,
                                                 resultSet.getMetaData().getColumnName(i),
                                                 resultSet.getMetaData().getColumnType(i),

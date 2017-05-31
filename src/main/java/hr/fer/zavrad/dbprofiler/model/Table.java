@@ -3,10 +3,11 @@ package hr.fer.zavrad.dbprofiler.model;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Optional;
-import java.util.StringJoiner;
+import java.util.*;
 
-public class Table extends DatabaseObject {
+public class Table extends ProfilerObject {
+
+    private static final int REPRESENTATION_WHITESPACE_OFFSET = 5;
 
     private final String name;
     private Optional<String> representationWithColumns;
@@ -15,7 +16,7 @@ public class Table extends DatabaseObject {
     private boolean showRowsCount;
 
     public Table(String name) {
-        super(DatabaseObjectType.TABLE);
+        super(ProfilerObjectType.TABLE);
         this.name = name;
         this.representationWithColumns = Optional.empty();
         this.representationWithRowsCount = Optional.empty();
@@ -24,7 +25,7 @@ public class Table extends DatabaseObject {
     public Table(Connection connection, String name, boolean rowCountRepresentation) {
         this(name);
 
-        StringJoiner joiner = new StringJoiner(System.lineSeparator());
+        List<String> attributes = new ArrayList<>();
         ResultSet resultSet = null;
         try {
             resultSet = connection.createStatement()
@@ -33,14 +34,24 @@ public class Table extends DatabaseObject {
             while (resultSet.next()) {
                 for (int i = 1, length = resultSet.getMetaData().getColumnCount(); i <= length; ++i) {
 
-                    joiner.add(new TableColumn(name, resultSet.getMetaData().getColumnName(i),
+                    attributes.add(new TableColumn(name, resultSet.getMetaData().getColumnName(i),
                             resultSet.getMetaData().getColumnType(i),
                             connection, false).toString());
 
                 }
             }
 
-            this.representationWithColumns = Optional.of(String.format("%s%n%n%s", this.name, joiner.toString()));
+            int underscoreSeparatorLength = attributes.stream().mapToInt(String::length).max().getAsInt()
+                                + REPRESENTATION_WHITESPACE_OFFSET;
+
+            attributes.add(0, this.name);
+            attributes.add(1, String.join("", Collections.nCopies(underscoreSeparatorLength, "_")));
+            attributes.add(2, String.join("", Collections.nCopies(underscoreSeparatorLength, " ")));
+
+            StringJoiner joiner = new StringJoiner(System.lineSeparator());
+            attributes.forEach(a -> joiner.add(a));
+
+            this.representationWithColumns = Optional.of(joiner.toString());
             this.representationWithRowsCount = Optional.empty();
 
         } catch (SQLException e) {

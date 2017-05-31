@@ -13,33 +13,28 @@ public class TextualColumnStatistics extends ColumnStatistics {
     private static final Integer MIN_SHOW_DISTRIBUTION_PATTERN_COUNT = 5;
     private static final Integer MAX_SHOW_DISTRIBUTION_TEXT_LENGTH = 15;
 
-    private final Integer totalValuesCount;
-    private final Integer nullValuesCount;
-    private final Long patternValuesCount;
     private final Integer minimumLength;
     private final Integer maximumLength;
     private final Double averageLength;
     private final XYChart.Series recordCountData;
     private final Optional<XYChart.Series> patternInformationData;
 
-    public TextualColumnStatistics(Integer totalValues, Integer nullValues, Integer minimumLength,
+    public TextualColumnStatistics(Integer nullValuesCount, Integer minimumLength,
                                    Integer maximumLength, Double averageLength, Map<String, Integer> valuesByCount) {
-        this.totalValuesCount = totalValues;
-        this.nullValuesCount = nullValues;
 
         this.minimumLength = minimumLength;
         this.maximumLength = maximumLength;
         this.averageLength = averageLength;
 
-        this.patternValuesCount = valuesByCount.entrySet().stream().filter(e -> e.getValue() > 1).count();
+        long patternValuesCount = valuesByCount.entrySet().stream().filter(e -> e.getValue() > 1).count();
 
         this.recordCountData = new XYChart.Series();
-        recordCountData.getData().add(new XYChart.Data("Total", totalValuesCount));
         recordCountData.getData().add(new XYChart.Data("Null", nullValuesCount));
         recordCountData.getData().add(new XYChart.Data("Pattern", patternValuesCount));
 
         if(patternValuesCount < MIN_SHOW_DISTRIBUTION_PATTERN_COUNT ||
                 maximumLength > MAX_SHOW_DISTRIBUTION_TEXT_LENGTH) {
+
             patternInformationData = Optional.empty();
             return;
         }
@@ -56,18 +51,6 @@ public class TextualColumnStatistics extends ColumnStatistics {
         patternInformatonDataValues.getData().addAll(data);
 
         patternInformationData = Optional.of(patternInformatonDataValues);
-    }
-
-    public Integer getTotalValuesCount() {
-        return totalValuesCount;
-    }
-
-    public Integer getNullValuesCount() {
-        return nullValuesCount;
-    }
-
-    public Long getPatternValuesCount() {
-        return patternValuesCount;
     }
 
     public Integer getMinimumLength() {

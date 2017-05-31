@@ -1,6 +1,6 @@
 package hr.fer.zavrad.dbprofiler.model;
 
-public enum DatabaseObjectType {
+public enum ProfilerObjectType {
 
     DATABASE,
     TABLE,

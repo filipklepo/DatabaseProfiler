@@ -28,7 +28,7 @@ public class DatabaseOverviewController {
     private Connection connection;
 
     @FXML
-    private TreeView<DatabaseObject> tvTables;
+    private TreeView<ProfilerObject> tvTables;
     @FXML
     private Button btnRelationalDiagram;
     @FXML
@@ -50,15 +50,15 @@ public class DatabaseOverviewController {
         };
         new Thread(task).start();
 
-        tvTables.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem<DatabaseObject>>() {
+        tvTables.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem<ProfilerObject>>() {
             @Override
-            public void changed(ObservableValue<? extends TreeItem<DatabaseObject>> observable,
-                                TreeItem<DatabaseObject> oldValue, TreeItem<DatabaseObject> newValue) {
+            public void changed(ObservableValue<? extends TreeItem<ProfilerObject>> observable,
+                                TreeItem<ProfilerObject> oldValue, TreeItem<ProfilerObject> newValue) {
                 if(Objects.isNull(newValue)) return;
 
                 vbStatistics.getChildren().clear();
-                DatabaseObject object = newValue.getValue();
-                if(object.getType() == DatabaseObjectType.COLUMN) {
+                ProfilerObject object = newValue.getValue();
+                if(object.getType() == ProfilerObjectType.COLUMN) {
 
                     TableColumn column = (TableColumn) object;
 
