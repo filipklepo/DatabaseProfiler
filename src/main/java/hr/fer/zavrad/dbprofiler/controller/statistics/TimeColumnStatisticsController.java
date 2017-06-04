@@ -1,12 +1,11 @@
 package hr.fer.zavrad.dbprofiler.controller;
 
-import hr.fer.zavrad.dbprofiler.model.TimeColumnStatistics;
-import hr.fer.zavrad.dbprofiler.model.TimestampColumnStatistics;
+import hr.fer.zavrad.dbprofiler.model.statistics.TimeColumnStatistics;
 import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
 import javafx.scene.control.Label;
 
-public class TimestampColumnStatisticsController {
+public class TimeColumnStatisticsController {
 
     @FXML
     private BarChart bcPatternInformation;
@@ -23,9 +22,10 @@ public class TimestampColumnStatisticsController {
     @FXML
     private Label lblMeanValue;
 
-    private final TimestampColumnStatistics statistics;
 
-    public TimestampColumnStatisticsController(TimestampColumnStatistics statistics) {
+    private final TimeColumnStatistics statistics;
+
+    public TimeColumnStatisticsController(TimeColumnStatistics statistics) {
         this.statistics = statistics;
     }
 
@@ -44,6 +44,6 @@ public class TimestampColumnStatisticsController {
         }
 
         bcPatternInformation.getData().addAll(statistics.getPatternInformationData().get());
-        bcPatternInformation.setTitle("Pattern information");
+        bcPatternInformation.setTitle("Top 10 values by occurrences");
     }
 }

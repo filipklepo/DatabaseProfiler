@@ -1,6 +1,6 @@
 package hr.fer.zavrad.dbprofiler.controller;
 
-import hr.fer.zavrad.dbprofiler.model.GenericColumnStatistics;
+import hr.fer.zavrad.dbprofiler.model.statistics.GenericColumnStatistics;
 import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
 import javafx.scene.control.Label;

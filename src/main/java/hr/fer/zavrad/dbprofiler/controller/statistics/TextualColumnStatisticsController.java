@@ -1,42 +1,36 @@
 package hr.fer.zavrad.dbprofiler.controller;
 
-import hr.fer.zavrad.dbprofiler.model.DateColumnStatistics;
+import hr.fer.zavrad.dbprofiler.model.statistics.TextualColumnStatistics;
 import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
 import javafx.scene.control.Label;
 
-public class DateColumnStatisticsController {
+public class TextualColumnStatisticsController {
 
     @FXML
     private BarChart bcPatternInformation;
     @FXML
     private BarChart bcRecordCount;
     @FXML
-    private Label lblMinValue;
+    private Label lblMinLength;
     @FXML
-    private Label lblMaxValue;
+    private Label lblMaxLength;
     @FXML
-    private Label lblStdDev;
-    @FXML
-    private Label lblStdDevValue;
-    @FXML
-    private Label lblMeanValue;
+    private Label lblAverageLength;
 
+    private final TextualColumnStatistics statistics;
 
-    private final DateColumnStatistics statistics;
-
-    public DateColumnStatisticsController(DateColumnStatistics statistics) {
+    public TextualColumnStatisticsController(TextualColumnStatistics statistics) {
         this.statistics = statistics;
     }
 
     public void initialize() {
-        lblMinValue.setText(statistics.getMinimumValue().toString());
-        lblMaxValue.setText(statistics.getMaximumValue().toString());
-
         bcRecordCount.getData().addAll(statistics.getRecordCountData());
         bcRecordCount.setTitle("Record Count");
-        lblMeanValue.setText(statistics.getMean().toString());
-        lblStdDev.setText("");
+
+        lblMinLength.setText(statistics.getMinimumLength().toString());
+        lblMaxLength.setText(statistics.getMaximumLength().toString());
+        lblAverageLength.setText(statistics.getAverageLength().toString());
 
         if(!statistics.getPatternInformationData().isPresent()) {
             bcPatternInformation.visibleProperty().setValue(false);
@@ -44,6 +38,7 @@ public class DateColumnStatisticsController {
         }
 
         bcPatternInformation.getData().addAll(statistics.getPatternInformationData().get());
-        bcPatternInformation.setTitle("Pattern information");
+        bcPatternInformation.setTitle("Top 10 values by occurrences");
+
     }
 }

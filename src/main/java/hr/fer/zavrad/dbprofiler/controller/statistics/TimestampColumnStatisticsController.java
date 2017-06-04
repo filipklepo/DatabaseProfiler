@@ -1,11 +1,11 @@
 package hr.fer.zavrad.dbprofiler.controller;
 
-import hr.fer.zavrad.dbprofiler.model.NumericColumnStatistics;
+import hr.fer.zavrad.dbprofiler.model.statistics.TimestampColumnStatistics;
 import javafx.fxml.FXML;
-import javafx.scene.chart.*;
+import javafx.scene.chart.BarChart;
 import javafx.scene.control.Label;
 
-public class NumericColumnStatisticsController {
+public class TimestampColumnStatisticsController {
 
     @FXML
     private BarChart bcPatternInformation;
@@ -16,17 +16,15 @@ public class NumericColumnStatisticsController {
     @FXML
     private Label lblMaxValue;
     @FXML
-    private Label lblMean;
-    @FXML
     private Label lblStdDev;
     @FXML
-    private Label lblMeanValue;
-    @FXML
     private Label lblStdDevValue;
+    @FXML
+    private Label lblMeanValue;
 
-    private final NumericColumnStatistics statistics;
+    private final TimestampColumnStatistics statistics;
 
-    public NumericColumnStatisticsController(NumericColumnStatistics statistics) {
+    public TimestampColumnStatisticsController(TimestampColumnStatistics statistics) {
         this.statistics = statistics;
     }
 
@@ -36,18 +34,15 @@ public class NumericColumnStatisticsController {
 
         bcRecordCount.getData().addAll(statistics.getRecordCountData());
         bcRecordCount.setTitle("Record Count");
+        lblMeanValue.setText(statistics.getMean().toString());
+        lblStdDev.setText("");
 
         if(!statistics.getPatternInformationData().isPresent()) {
             bcPatternInformation.visibleProperty().setValue(false);
-            lblMean.setText("");
-            lblStdDev.setText("");
             return;
         }
 
         bcPatternInformation.getData().addAll(statistics.getPatternInformationData().get());
-        bcPatternInformation.setTitle("Pattern information");
-
-        lblMeanValue.setText(String.format("%.3f", statistics.getMean()));
-        lblStdDevValue.setText(String.format("%.3f", statistics.getStdDev()));
+        bcPatternInformation.setTitle("Top 10 values by occurrences");
     }
 }
