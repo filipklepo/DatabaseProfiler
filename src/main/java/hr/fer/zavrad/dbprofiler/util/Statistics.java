@@ -1,6 +1,12 @@
 package hr.fer.zavrad.dbprofiler.util;
 
-import hr.fer.zavrad.dbprofiler.model.*;
+import hr.fer.zavrad.dbprofiler.model.Table;
+import hr.fer.zavrad.dbprofiler.model.TableColumn;
+import hr.fer.zavrad.dbprofiler.model.statistics.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.chart.PieChart;
+import javafx.scene.chart.XYChart;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -17,20 +23,13 @@ import java.util.Optional;
  */
 public final class Statistics {
 
-    private static final int QUERY_ROWS_LIMIT = 100_000;
-    private static final String GENERIC_QUERY_TEMPLATE = "SELECT %s FROM %s LIMIT %d";
-
     private Statistics() {
     }
 
     public static Optional<ColumnStatistics> generateNumericColumnStatistics(
-            Connection connection, String tableName, String columnName, TableColumnType columnType) {
+            Connection connection, Table table, TableColumn column) {
 
-        if(!Connections.isNumericColumn(columnType)) {
-            return Optional.empty();
-        }
-
-        String query = String.format(GENERIC_QUERY_TEMPLATE, columnName, tableName, QUERY_ROWS_LIMIT);
+        String query = Queries.getSelectColumnQuery(connection, table, column).get();
         try {
             Integer totalValues = 0;
             Integer nullValues = 0;
@@ -43,7 +42,7 @@ public final class Statistics {
             ResultSet resultSet = connection.createStatement().executeQuery(query);
 
             while(resultSet.next()) {
-                Double result = resultSet.getDouble(columnName);
+                Double result = resultSet.getDouble(column.getColumnName());
                 totalValues++;
 
                 if(Objects.isNull(result)) {
@@ -68,7 +67,7 @@ public final class Statistics {
             ResultSet stdDevResultSet = connection.createStatement().executeQuery(query);
 
             while(stdDevResultSet.next()) {
-                Double result = stdDevResultSet.getDouble(columnName);
+                Double result = stdDevResultSet.getDouble(column.getColumnName());
 
                 bdStdDev = bdStdDev.add(BigDecimal.valueOf(Math.pow(result - mean, 2.0)));
             }
@@ -86,13 +85,9 @@ public final class Statistics {
     }
 
     public static Optional<ColumnStatistics> generateTextualColumnStatistics(
-            Connection connection, String tableName, String columnName, TableColumnType columnType) {
+            Connection connection, Table table, TableColumn column) {
 
-        if(!Connections.isTextualColumn(columnType)) {
-            return Optional.empty();
-        }
-
-        String query = String.format(GENERIC_QUERY_TEMPLATE, columnName, tableName, QUERY_ROWS_LIMIT);
+        String query = Queries.getSelectColumnQuery(connection, table, column).get();
         try {
             Integer totalValues = 0;
             Integer nullValues = 0;
@@ -104,7 +99,7 @@ public final class Statistics {
             ResultSet resultSet = connection.createStatement().executeQuery(query);
 
             while(resultSet.next()) {
-                String result = resultSet.getString(columnName);
+                String result = resultSet.getString(column.getColumnName());
 
                 if(Objects.isNull(result)) {
                     nullValues++;
@@ -142,13 +137,9 @@ public final class Statistics {
     }
 
     public static Optional<ColumnStatistics> generateDateColumnStatistics(
-            Connection connection, String tableName, String columnName, TableColumnType columnType) {
+            Connection connection, Table table, TableColumn column) {
 
-        if(columnType != columnType.DATE) {
-            return Optional.empty();
-        }
-
-        String query = String.format(GENERIC_QUERY_TEMPLATE, columnName, tableName, QUERY_ROWS_LIMIT);
+        String query = Queries.getSelectColumnQuery(connection, table, column).get();
         try {
             Integer totalValues = 0;
             Integer nullValues = 0;
@@ -161,7 +152,7 @@ public final class Statistics {
             ResultSet resultSet = connection.createStatement().executeQuery(query);
 
             while(resultSet.next()) {
-                Date result = resultSet.getDate(columnName);
+                Date result = resultSet.getDate(column.getColumnName());
                 totalValues++;
 
                 if(Objects.isNull(result)) {
@@ -186,7 +177,7 @@ public final class Statistics {
             ResultSet stdDevResultSet = connection.createStatement().executeQuery(query);
 
             while(stdDevResultSet.next()) {
-                Date result = stdDevResultSet.getDate(columnName);
+                Date result = stdDevResultSet.getDate(column.getColumnName());
 
                 if(Objects.isNull(result)) {
                     continue;
@@ -210,13 +201,9 @@ public final class Statistics {
     }
 
     public static Optional<ColumnStatistics> generateTimeColumnStatistics(
-            Connection connection, String tableName, String columnName, TableColumnType columnType) {
+            Connection connection, Table table, TableColumn column) {
 
-        if (columnType != columnType.TIME) {
-            return Optional.empty();
-        }
-
-        String query = String.format(GENERIC_QUERY_TEMPLATE, columnName, tableName, QUERY_ROWS_LIMIT);
+        String query = Queries.getSelectColumnQuery(connection, table, column).get();
         try {
             Integer totalValues = 0;
             Integer nullValues = 0;
@@ -229,7 +216,7 @@ public final class Statistics {
             ResultSet resultSet = connection.createStatement().executeQuery(query);
 
             while (resultSet.next()) {
-                Time result = resultSet.getTime(columnName);
+                Time result = resultSet.getTime(column.getColumnName());
                 totalValues++;
 
                 if (Objects.isNull(result)) {
@@ -254,7 +241,7 @@ public final class Statistics {
             ResultSet stdDevResultSet = connection.createStatement().executeQuery(query);
 
             while (stdDevResultSet.next()) {
-                Date result = stdDevResultSet.getDate(columnName);
+                Date result = stdDevResultSet.getDate(column.getColumnName());
 
                 if(Objects.isNull(result)) {
                     continue;
@@ -278,13 +265,9 @@ public final class Statistics {
     }
 
         public static Optional<ColumnStatistics> generateTimestampColumnStatistics(
-                Connection connection, String tableName, String columnName, TableColumnType columnType) {
+                Connection connection, Table table, TableColumn column) {
 
-            if (columnType != columnType.TIMESTAMP) {
-                return Optional.empty();
-            }
-
-            String query = String.format(GENERIC_QUERY_TEMPLATE, columnName, tableName, QUERY_ROWS_LIMIT);
+            String query = Queries.getSelectColumnQuery(connection, table, column).get();
             try {
                 Integer totalValues = 0;
                 Integer nullValues = 0;
@@ -297,7 +280,7 @@ public final class Statistics {
                 ResultSet resultSet = connection.createStatement().executeQuery(query);
 
                 while (resultSet.next()) {
-                    Timestamp result = resultSet.getTimestamp(columnName);
+                    Timestamp result = resultSet.getTimestamp(column.getColumnName());
                     totalValues++;
 
                     if (Objects.isNull(result)) {
@@ -322,7 +305,7 @@ public final class Statistics {
                 ResultSet stdDevResultSet = connection.createStatement().executeQuery(query);
 
                 while (stdDevResultSet.next()) {
-                    Timestamp result = stdDevResultSet.getTimestamp(columnName);
+                    Timestamp result = stdDevResultSet.getTimestamp(column.getColumnName());
 
                     if(Objects.isNull(result)) {
                         continue;
@@ -346,9 +329,9 @@ public final class Statistics {
         }
 
         public static Optional<ColumnStatistics> generateGenericColumnStatistics(
-                Connection connection, String tableName, String columnName, TableColumnType columnType) {
+                Connection connection, Table table, TableColumn column) {
 
-            String query = String.format(GENERIC_QUERY_TEMPLATE, columnName, tableName, QUERY_ROWS_LIMIT);
+            String query = Queries.getSelectColumnQuery(connection, table, column).get();
             try {
                 Integer totalValues = 0;
                 Integer nullValues = 0;
@@ -356,7 +339,7 @@ public final class Statistics {
                 ResultSet resultSet = connection.createStatement().executeQuery(query);
 
                 while (resultSet.next()) {
-                    Object result = resultSet.getObject(columnName);
+                    Object result = resultSet.getObject(column.getColumnName());
                     totalValues++;
 
                     if (Objects.isNull(result)) {
@@ -372,4 +355,45 @@ public final class Statistics {
                 return Optional.empty();
             }
         }
+
+    public static Optional<ColumnStatistics> generateBitColumnStatistics(
+            Connection connection, Table table, TableColumn column) {
+
+        String query = Queries.getSelectColumnQuery(connection, table, column).get();
+        try {
+            Integer nullValues = 0;
+            Integer zeros = 0;
+            Integer ones = 0;
+
+            ResultSet resultSet = connection.createStatement().executeQuery(query);
+
+            while (resultSet.next()) {
+                String result = resultSet.getString(column.getColumnName());
+
+                if (Objects.isNull(result)) {
+                    nullValues++;
+                }
+
+                if(result.equals("0")) {
+                    zeros++;
+                } else {
+                    ones++;
+                }
+            }
+
+            ObservableList<PieChart.Data> distributionData = FXCollections.observableArrayList();
+            distributionData.addAll(new PieChart.Data("zeros", zeros));
+            distributionData.addAll(new PieChart.Data("ones", ones));
+
+            XYChart.Series recordCount = new XYChart.Series();
+            recordCount.getData().add(new XYChart.Data("Null", nullValues));
+
+            return Optional.of(
+                    new BitColumnStatistics(recordCount, distributionData));
+        } catch (SQLException e) {
+
+            e.printStackTrace();
+            return Optional.empty();
+        }
     }
+}

@@ -6,6 +6,9 @@ import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.view.mxGraph;
 import hr.fer.zavrad.dbprofiler.model.*;
+import hr.fer.zavrad.dbprofiler.model.rule.NumericRangeRule;
+import hr.fer.zavrad.dbprofiler.model.rule.RegularExpressionRule;
+import hr.fer.zavrad.dbprofiler.model.rule.Rules;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingNode;
@@ -204,6 +207,14 @@ public final class Connections {
             TreeItem<ProfilerObject> rootItem = new TreeItem(new Database(connection.getCatalog()));
             rootItem.setExpanded(true);
 
+            TreeItem<ProfilerObject> rules = new TreeItem<>(new Rules());
+
+            rules.getChildren().addAll(
+                    new TreeItem<ProfilerObject>(new RegularExpressionRule()),
+                    new TreeItem<ProfilerObject>(new NumericRangeRule()));
+
+            rootItem.getChildren().add(rules);
+
             for(String tableName : getTableNames(connection)) {
                 Table table = new Table(connection, tableName, true);
                 table.setShowRowsCount(true);
@@ -217,7 +228,7 @@ public final class Connections {
                     for(int i = 1, length = resultSet.getMetaData().getColumnCount(); i <= length; ++i) {
 
                         TreeItem<ProfilerObject> columnItem =
-                                new TreeItem<>(new TableColumn(tableName,
+                                new TreeItem<>(new TableColumn(table,
                                                 resultSet.getMetaData().getColumnName(i),
                                                 resultSet.getMetaData().getColumnType(i),
                                                 connection,
@@ -233,5 +244,20 @@ public final class Connections {
             e.printStackTrace();
             return Optional.empty();
         }
+    }
+
+    public static Optional<TableColumnType> getColumnType(String column, String table, Connection connection) {
+        String query = String.format("SELECT %S FROM %s LIMIT 1", column, table);
+
+        try {
+
+            ResultSet resultSet = connection.createStatement().executeQuery(query);
+
+            while(resultSet.next()) {
+                return getColumnType(resultSet.getMetaData().getColumnType(1));
+            }
+        } catch (SQLException e) {}
+
+        return Optional.empty();
     }
 }

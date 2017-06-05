@@ -1,15 +1,12 @@
 package hr.fer.zavrad.dbprofiler;
 
-import hr.fer.zavrad.dbprofiler.controller.ConnectController;
 import hr.fer.zavrad.dbprofiler.controller.DatabaseOverviewController;
 import hr.fer.zavrad.dbprofiler.model.DatabaseType;
 import hr.fer.zavrad.dbprofiler.util.ConnectionGenerator;
 import javafx.application.Application;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 import java.sql.*;

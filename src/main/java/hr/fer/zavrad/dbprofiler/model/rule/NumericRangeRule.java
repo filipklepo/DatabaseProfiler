@@ -13,7 +13,6 @@ import java.util.Optional;
 
 public class NumericRangeRule extends Rule {
 
-    private static final String NAME = "Range";
     private static final int RESULTS_PRINT_LIMIT = 100;
 
     private Connection connection;
@@ -89,7 +88,7 @@ public class NumericRangeRule extends Rule {
 
                 resultCount++;
                 if(resultCount <= RESULTS_PRINT_LIMIT) {
-                    listView.getItems().add(result);
+                    listView.getItems().add(String.format("%d. %s", resultCount, result));
 
                     if(resultCount == RESULTS_PRINT_LIMIT) {
                         listView.getItems().add("...");

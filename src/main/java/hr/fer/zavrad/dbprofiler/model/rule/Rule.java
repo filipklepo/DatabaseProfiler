@@ -1,18 +1,26 @@
-package hr.fer.zavrad.dbprofiler.model;
+package hr.fer.zavrad.dbprofiler.model.rule;
 
-import java.util.Objects;
+import hr.fer.zavrad.dbprofiler.model.ProfilerObject;
+import hr.fer.zavrad.dbprofiler.model.ProfilerObjectType;
+import javafx.scene.control.ListView;
 
-public class Rule extends ProfilerObject {
+public abstract class Rule extends ProfilerObject {
 
-    private final String name;
+    private final RuleType ruleType;
 
-    public Rule(String name) {
+    public Rule(RuleType ruleType) {
         super(ProfilerObjectType.RULE);
-        this.name = Objects.requireNonNull(name);
+        this.ruleType = ruleType;
+    }
+
+    public abstract void execute(ListView<String> listView);
+
+    public RuleType getRuleType() {
+        return ruleType;
     }
 
     @Override
     public String toString() {
-        return name;
+        return ruleType.toString();
     }
 }

@@ -1,5 +1,6 @@
-package hr.fer.zavrad.dbprofiler.model;
+package hr.fer.zavrad.dbprofiler.model.statistics;
 
+import hr.fer.zavrad.dbprofiler.model.statistics.ColumnStatistics;
 import javafx.scene.chart.XYChart;
 
 import java.sql.Timestamp;

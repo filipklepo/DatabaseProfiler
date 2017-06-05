@@ -1,5 +1,7 @@
 package hr.fer.zavrad.dbprofiler.model;
 
+import hr.fer.zavrad.dbprofiler.util.Connections;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -10,20 +12,23 @@ public class Table extends ProfilerObject {
     private static final int REPRESENTATION_WHITESPACE_OFFSET = 5;
 
     private final String name;
+    private int rowCount;
     private Optional<String> representationWithColumns;
     private Optional<String> representationWithRowsCount;
     private boolean showAttributes;
     private boolean showRowsCount;
 
-    public Table(String name) {
+    public Table(Connection connection, String name) {
         super(ProfilerObjectType.TABLE);
         this.name = name;
         this.representationWithColumns = Optional.empty();
         this.representationWithRowsCount = Optional.empty();
+
+        calculateRowCount(connection);
     }
 
     public Table(Connection connection, String name, boolean rowCountRepresentation) {
-        this(name);
+        this(connection, name);
 
         List<String> attributes = new ArrayList<>();
         ResultSet resultSet = null;
@@ -34,9 +39,8 @@ public class Table extends ProfilerObject {
             while (resultSet.next()) {
                 for (int i = 1, length = resultSet.getMetaData().getColumnCount(); i <= length; ++i) {
 
-                    attributes.add(new TableColumn(name, resultSet.getMetaData().getColumnName(i),
-                            resultSet.getMetaData().getColumnType(i),
-                            connection, false).toString());
+                    attributes.add(String.format("%s: %s", resultSet.getMetaData().getColumnName(i),
+                            Connections.getColumnType(resultSet.getMetaData().getColumnType(i))));
 
                 }
             }
@@ -60,28 +64,27 @@ public class Table extends ProfilerObject {
         }
 
         if(rowCountRepresentation) {
+            this.representationWithRowsCount = Optional.of(String.format("%s (%d rows)", this.name, this.rowCount));
+            this.representationWithColumns = Optional.empty();
+        }
+    }
 
-            ResultSet rowCountResultSet = null;
-            try {
-                int rowsCount = 0;
+    private void calculateRowCount(Connection connection) {
+        ResultSet rowCountResultSet = null;
+        try {
+            int rowsCount = 0;
 
-                rowCountResultSet = connection.createStatement()
-                        .executeQuery("SELECT COUNT(*) AS COUNT FROM " + name);
+            rowCountResultSet = connection.createStatement()
+                    .executeQuery("SELECT COUNT(*) AS COUNT FROM " + name);
 
-                while (rowCountResultSet.next()) {
-                    rowsCount = rowCountResultSet.getInt("COUNT");
-                    break;
-                }
-
-                this.representationWithRowsCount = Optional.of(String.format("%s (%d rows)", this.name, rowsCount));
-                this.representationWithColumns = Optional.empty();
-
-            } catch (SQLException e) {
-                e.printStackTrace();
-
-                this.representationWithColumns = Optional.empty();
-                this.representationWithRowsCount = Optional.empty();
+            while (rowCountResultSet.next()) {
+                rowsCount = rowCountResultSet.getInt("COUNT");
+                break;
             }
+
+            this.rowCount = rowsCount;
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -95,6 +98,10 @@ public class Table extends ProfilerObject {
 
     public String getName() {
         return name;
+    }
+
+    public int getRowCount() {
+        return rowCount;
     }
 
     @Override

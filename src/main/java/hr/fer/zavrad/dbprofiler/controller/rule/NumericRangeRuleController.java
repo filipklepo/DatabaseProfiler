@@ -1,8 +1,6 @@
 package hr.fer.zavrad.dbprofiler.controller.rule;
 
 import hr.fer.zavrad.dbprofiler.model.rule.NumericRangeRule;
-import hr.fer.zavrad.dbprofiler.model.rule.Rule;
-import hr.fer.zavrad.dbprofiler.util.AlertBox;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;

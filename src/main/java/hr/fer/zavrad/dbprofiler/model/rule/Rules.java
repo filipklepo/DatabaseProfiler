@@ -1,6 +1,10 @@
-package hr.fer.zavrad.dbprofiler.model;
+package hr.fer.zavrad.dbprofiler.model.rule;
+
+import hr.fer.zavrad.dbprofiler.model.ProfilerObject;
+import hr.fer.zavrad.dbprofiler.model.ProfilerObjectType;
 
 public class Rules extends ProfilerObject {
+
     private static final String REPRESENTATION = "Rules";
 
     public Rules() {

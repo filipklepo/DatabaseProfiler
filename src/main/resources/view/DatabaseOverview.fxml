@@ -37,10 +37,13 @@
                         <VBox fx:id="vbProfilerData" prefHeight="221.0" prefWidth="259.0" BorderPane.alignment="CENTER" />
                      </center>
                      <top>
-                        <Label fx:id="lblDataName" text="Label" BorderPane.alignment="CENTER">
+                        <Label fx:id="lblDataName" BorderPane.alignment="CENTER">
                            <font>
                               <Font size="18.0" />
                            </font>
+                           <padding>
+                              <Insets bottom="10.0" />
+                           </padding>
                         </Label>
                      </top>
                   </BorderPane>

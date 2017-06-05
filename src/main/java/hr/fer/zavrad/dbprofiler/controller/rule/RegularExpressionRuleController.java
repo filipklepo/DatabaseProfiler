@@ -10,7 +10,7 @@ import javafx.scene.input.MouseEvent;
 
 import java.sql.Connection;
 
-public class RegularExpressionController {
+public class RegularExpressionRuleController {
 
     @FXML
     private TextField tfRegularExpression;
@@ -25,7 +25,7 @@ public class RegularExpressionController {
 
     private final Connection connection;
 
-    public RegularExpressionController(Connection connection) {
+    public RegularExpressionRuleController(Connection connection) {
         this.connection = connection;
     }
 

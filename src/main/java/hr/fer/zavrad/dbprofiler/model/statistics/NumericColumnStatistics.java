@@ -1,6 +1,6 @@
-package hr.fer.zavrad.dbprofiler.model;
+package hr.fer.zavrad.dbprofiler.model.statistics;
 
-import javafx.scene.chart.PieChart;
+import hr.fer.zavrad.dbprofiler.model.statistics.ColumnStatistics;
 import javafx.scene.chart.XYChart;
 
 import java.util.Comparator;
@@ -17,6 +17,7 @@ public class NumericColumnStatistics extends ColumnStatistics {
     private final Double stdDev;
     private final XYChart.Series recordCountData;
     private final Optional<XYChart.Series> patternInformationData;
+    private final Optional<XYChart.Series> distributionData;
 
     public NumericColumnStatistics(Integer nullValuesCount, Double minimumValue,
                                    Double maximumValue, Map<Double, Integer> valuesByCount, Double mean, Double stdDev) {
@@ -33,6 +34,7 @@ public class NumericColumnStatistics extends ColumnStatistics {
 
         if(patternValuesCount < 5) {
             patternInformationData = Optional.empty();
+            distributionData = Optional.empty();
             return;
         }
 
@@ -41,17 +43,27 @@ public class NumericColumnStatistics extends ColumnStatistics {
                 .filter(e -> Double.compare(e.getKey(), threeSigma) > 0).count();
         recordCountData.getData().add(new XYChart.Data("Pot. Wrong", potentiallyWrongValuesCount));
 
-        List<XYChart.Data> data = valuesByCount.keySet().stream().sorted(new Comparator<Double>() {
+        List<XYChart.Data> patternInformationDataData = valuesByCount.keySet().stream().sorted(new Comparator<Double>() {
             @Override
             public int compare(Double o1, Double o2) {
                 return Integer.compare(valuesByCount.get(o2), valuesByCount.get(o1));
             }
-        }).limit(10).map(x -> new XYChart.Data(x.toString(), (int)valuesByCount.get(x))).collect(Collectors.toList());
+        }).limit(10)
+                .map(x -> new XYChart.Data(x.toString(), (int)valuesByCount.get(x)))
+                .collect(Collectors.toList());
+
+        List<XYChart.Data> distributionData = valuesByCount.keySet().stream()
+                .sorted()
+                .map(x -> new XYChart.Data(x.toString(), (int)valuesByCount.get(x)))
+                .collect(Collectors.toList());
 
         XYChart.Series patternInformatonDataValues = new XYChart.Series();
-        patternInformatonDataValues.getData().addAll(data);
+        patternInformatonDataValues.getData().addAll(patternInformationDataData);
+        XYChart.Series distributionDataValues = new XYChart.Series();
+        distributionDataValues.getData().addAll(distributionData);
 
         this.patternInformationData = Optional.of(patternInformatonDataValues);
+        this.distributionData = Optional.of(distributionDataValues);
     }
 
     public Double getMinimumValue() {
@@ -69,4 +81,8 @@ public class NumericColumnStatistics extends ColumnStatistics {
     public XYChart.Series getRecordCountData() { return recordCountData; }
 
     public Optional<XYChart.Series> getPatternInformationData() { return patternInformationData; }
+
+    public Optional<XYChart.Series> getDistributionData() {
+        return distributionData;
+    }
 }

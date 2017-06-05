@@ -1,4 +1,4 @@
-package hr.fer.zavrad.dbprofiler.model;
+package hr.fer.zavrad.dbprofiler.model.statistics;
 
 public class ColumnStatistics {
 

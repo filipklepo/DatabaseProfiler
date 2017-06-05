@@ -1,4 +1,4 @@
-package hr.fer.zavrad.dbprofiler.controller;
+package hr.fer.zavrad.dbprofiler.controller.statistics;
 
 import hr.fer.zavrad.dbprofiler.model.statistics.TextualColumnStatistics;
 import javafx.fxml.FXML;

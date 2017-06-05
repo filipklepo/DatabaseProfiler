@@ -1,8 +1,9 @@
-package hr.fer.zavrad.dbprofiler.model;
+package hr.fer.zavrad.dbprofiler.model.statistics;
 
+import hr.fer.zavrad.dbprofiler.model.statistics.ColumnStatistics;
 import javafx.scene.chart.XYChart;
 
-public class GenericColumnStatistics extends ColumnStatistics{
+public class GenericColumnStatistics extends ColumnStatistics {
 
     private final XYChart.Series recordCountData;
 

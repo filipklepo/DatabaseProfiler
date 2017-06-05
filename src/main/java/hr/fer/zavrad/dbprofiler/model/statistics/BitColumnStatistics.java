@@ -1,8 +1,6 @@
-package hr.fer.zavrad.dbprofiler.model;
+package hr.fer.zavrad.dbprofiler.model.statistics;
 
 import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
-import javafx.scene.chart.BarChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 

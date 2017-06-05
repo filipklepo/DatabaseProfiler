@@ -1,4 +1,4 @@
-package hr.fer.zavrad.dbprofiler.controller;
+package hr.fer.zavrad.dbprofiler.controller.statistics;
 
 import hr.fer.zavrad.dbprofiler.model.statistics.NumericColumnStatistics;
 import javafx.fxml.FXML;
@@ -23,6 +23,8 @@ public class NumericColumnStatisticsController {
     private Label lblMeanValue;
     @FXML
     private Label lblStdDevValue;
+    @FXML
+    private LineChart lcDistribution;
 
     private final NumericColumnStatistics statistics;
 
@@ -39,6 +41,7 @@ public class NumericColumnStatisticsController {
 
         if(!statistics.getPatternInformationData().isPresent()) {
             bcPatternInformation.visibleProperty().setValue(false);
+            lcDistribution.visibleProperty().setValue(false);
             lblMean.setText("");
             lblStdDev.setText("");
             return;
@@ -46,6 +49,9 @@ public class NumericColumnStatisticsController {
 
         bcPatternInformation.getData().addAll(statistics.getPatternInformationData().get());
         bcPatternInformation.setTitle("Top 10 values by occurrences");
+
+        lcDistribution.setTitle("Distribution");
+        lcDistribution.getData().addAll(statistics.getDistributionData().get());
 
         lblMeanValue.setText(String.format("%.3f", statistics.getMean()));
         lblStdDevValue.setText(String.format("%.3f", statistics.getStdDev()));
