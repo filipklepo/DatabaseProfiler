@@ -17,6 +17,7 @@ public class DateColumnStatistics extends ColumnStatistics {
     private final Date mean;
     private final XYChart.Series recordCountData;
     private final Optional<XYChart.Series> patternInformationData;
+    private final Optional<XYChart.Series> distributionData;
 
     public DateColumnStatistics(Integer nullValuesCount, Date minimumValue, Date maximumValue,
                                 Date mean, Long stdDev, Map<Date, Integer> valuesByCount) {
@@ -33,6 +34,7 @@ public class DateColumnStatistics extends ColumnStatistics {
 
         if(patternValuesCount < 5) {
             patternInformationData = Optional.empty();
+            distributionData = Optional.empty();
             return;
         }
 
@@ -48,10 +50,19 @@ public class DateColumnStatistics extends ColumnStatistics {
             }
         }).limit(10).map(x -> new XYChart.Data(x.toString(), (int)valuesByCount.get(x))).collect(Collectors.toList());
 
+        List<XYChart.Data> distributionData = valuesByCount.keySet().stream()
+                .sorted()
+                .map(x -> new XYChart.Data(x.toString(), (int)valuesByCount.get(x)))
+                .collect(Collectors.toList());
+
+        XYChart.Series distributionDataValues = new XYChart.Series();
+        distributionDataValues.getData().addAll(distributionData);
+
         XYChart.Series patternInformatonDataValues = new XYChart.Series();
         patternInformatonDataValues.getData().addAll(data);
 
         this.patternInformationData = Optional.of(patternInformatonDataValues);
+        this.distributionData = Optional.of(distributionDataValues);
     }
 
     public Date getMinimumValue() {
@@ -72,5 +83,9 @@ public class DateColumnStatistics extends ColumnStatistics {
 
     public Optional<XYChart.Series> getPatternInformationData() {
         return patternInformationData;
+    }
+
+    public Optional<XYChart.Series> getDistributionData() {
+        return distributionData;
     }
 }

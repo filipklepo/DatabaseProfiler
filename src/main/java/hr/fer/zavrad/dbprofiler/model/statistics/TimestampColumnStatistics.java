@@ -17,6 +17,7 @@ public class TimestampColumnStatistics extends ColumnStatistics {
     private final Timestamp mean;
     private final XYChart.Series recordCountData;
     private final Optional<XYChart.Series> patternInformationData;
+    private final Optional<XYChart.Series> distributionData;
 
     public TimestampColumnStatistics(Integer nullValuesCount, Timestamp minimumValue,
                                      Timestamp maximumValue, Timestamp mean, Long stdDev,
@@ -34,6 +35,7 @@ public class TimestampColumnStatistics extends ColumnStatistics {
 
         if(patternValuesCount < 5) {
             patternInformationData = Optional.empty();
+            distributionData = Optional.empty();
             return;
         }
 
@@ -49,10 +51,19 @@ public class TimestampColumnStatistics extends ColumnStatistics {
             }
         }).limit(10).map(x -> new XYChart.Data(x.toString(), (int)valuesByCount.get(x))).collect(Collectors.toList());
 
+        List<XYChart.Data> distributionData = valuesByCount.keySet().stream()
+                .sorted()
+                .map(x -> new XYChart.Data(x.toString(), (int)valuesByCount.get(x)))
+                .collect(Collectors.toList());
+
         XYChart.Series patternInformatonDataValues = new XYChart.Series();
         patternInformatonDataValues.getData().addAll(data);
+        XYChart.Series distributionDataValues = new XYChart.Series();
+        distributionDataValues.getData().addAll(distributionData);
 
         this.patternInformationData = Optional.of(patternInformatonDataValues);
+        this.distributionData = Optional.of(distributionDataValues);
+
     }
 
     public Timestamp getMinimumValue() {
@@ -73,5 +84,9 @@ public class TimestampColumnStatistics extends ColumnStatistics {
 
     public Optional<XYChart.Series> getPatternInformationData() {
         return patternInformationData;
+    }
+
+    public Optional<XYChart.Series> getDistributionData() {
+        return distributionData;
     }
 }

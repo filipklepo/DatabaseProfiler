@@ -3,6 +3,7 @@ package hr.fer.zavrad.dbprofiler.controller.statistics;
 import hr.fer.zavrad.dbprofiler.model.statistics.DateColumnStatistics;
 import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
+import javafx.scene.chart.LineChart;
 import javafx.scene.control.Label;
 
 public class DateColumnStatisticsController {
@@ -21,6 +22,8 @@ public class DateColumnStatisticsController {
     private Label lblStdDevValue;
     @FXML
     private Label lblMeanValue;
+    @FXML
+    private LineChart lcDistribution;
 
 
     private final DateColumnStatistics statistics;
@@ -40,10 +43,14 @@ public class DateColumnStatisticsController {
 
         if(!statistics.getPatternInformationData().isPresent()) {
             bcPatternInformation.visibleProperty().setValue(false);
+            lcDistribution.visibleProperty().setValue(false);
             return;
         }
 
         bcPatternInformation.getData().addAll(statistics.getPatternInformationData().get());
         bcPatternInformation.setTitle("Top 10 values by occurrences");
+
+        lcDistribution.setTitle("Distribution");
+        lcDistribution.getData().addAll(statistics.getDistributionData().get());
     }
 }
