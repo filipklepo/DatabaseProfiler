@@ -6,6 +6,7 @@ public enum ProfilerObjectType {
     TABLE,
     COLUMN,
     RULES,
-    RULE
+    RULE,
+    SCHEMA
 
 }

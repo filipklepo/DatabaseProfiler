@@ -40,10 +40,10 @@ public class RelationalDiagramController {
     public void initialize() {
         lvTables.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        lvTables.setItems(
-                FXCollections.observableArrayList(
-                        Connections.getTableNames(connection).stream().map(t -> new Table(connection, t, false))
-                                                                      .collect(Collectors.toList())));
+//        lvTables.setItems(
+//                FXCollections.observableArrayList(
+//                        Connections.getTableNames(connection).stream().map(t -> new Table(connection, t, false))
+//                                                                      .collect(Collectors.toList())));
 
         btnSelectAll.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override

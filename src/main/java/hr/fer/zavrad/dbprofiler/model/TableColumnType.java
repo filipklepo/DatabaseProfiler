@@ -23,5 +23,5 @@ public enum TableColumnType {
     DATE,
     TIME,
     TIMESTAMP,
-    OTHER,
+    OTHER, NVARCHAR,
 }

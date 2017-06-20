@@ -7,14 +7,16 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Optional;
+import java.util.Properties;
 
 public class ConnectionGenerator {
 
     public static final String DEFAULT_ADDRESS = "127.0.0.1";
-    private static final String CONNECTION_STRING_TEMPLATE = "jdbc:%s://%s:%s/%s";
+    private static final String CONNECTION_STRING_TEMPLATE = "jdbc:%s://%s:%s/";
 
     private final ObjectProperty<DatabaseType> type;
 
@@ -70,14 +72,22 @@ public class ConnectionGenerator {
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
+                break;
+            default:
+                throw new RuntimeException("Unsupported database was given.");
         }
 
         try {
             String connectionString = String.format(CONNECTION_STRING_TEMPLATE, type.getValue().getConnectionName(),
-                                        address.getValue(), port.getValue(), databaseName.getValue());
+                                        address.getValue(), port.getValue());
 
-            return Optional.of(DriverManager.getConnection(connectionString, username.getValue(),
-                                                           password.getValue()));
+            Properties connectionProperties = new Properties();
+            connectionProperties.put("user", username.getValue());
+            connectionProperties.put("password", password.getValue());
+            connectionProperties.put("database", databaseName.getValue());
+            connectionProperties.put("port", port.getValue());
+
+            return Optional.of(DriverManager.getConnection(connectionString, connectionProperties));
         } catch (SQLException e) {
             return Optional.empty();
         }

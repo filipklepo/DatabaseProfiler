@@ -63,6 +63,7 @@ public class DatabaseOverviewController {
             @Override
             public void changed(ObservableValue<? extends TreeItem<ProfilerObject>> observable,
                                 TreeItem<ProfilerObject> oldValue, TreeItem<ProfilerObject> newValue) {
+
                 if(Objects.isNull(newValue)) return;
 
                 lblDataName.setText("");

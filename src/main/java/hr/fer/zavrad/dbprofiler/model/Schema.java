@@ -1,7 +1,8 @@
 package hr.fer.zavrad.dbprofiler.model;
 
-/**
- * Created by filip on 19.06.17..
- */
-public class Schema {
+public class Schema extends ProfilerObject {
+
+    public Schema() {
+        super(ProfilerObjectType.SCHEMA);
+    }
 }

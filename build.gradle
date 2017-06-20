@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    compile 'org.postgresql:postgresql:9.4.1212'
+    compile group: 'postgresql', name: 'postgresql', version: '9.1-901-1.jdbc4'
     compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.6'
     compile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '6.1.0.jre8'
     compile group: 'org.tinyjee.jgraphx', name: 'jgraphx', version: '3.4.1.3'

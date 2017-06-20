@@ -15,10 +15,7 @@ import javafx.embed.swing.SwingNode;
 import javafx.scene.control.TreeItem;
 
 import javax.swing.*;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
 
 /**
@@ -34,6 +31,7 @@ public final class Connections {
     static {
         COLUMN_TYPE = new HashMap<>();
 
+        COLUMN_TYPE.put(-9, TableColumnType.NVARCHAR);
         COLUMN_TYPE.put(-7, TableColumnType.BIT);
         COLUMN_TYPE.put(-6, TableColumnType.TINYINT);
         COLUMN_TYPE.put(-5, TableColumnType.BIGINT);
@@ -84,12 +82,18 @@ public final class Connections {
         return COLUMN_TYPE.containsKey(columnType) ? Optional.of(COLUMN_TYPE.get(columnType)) : Optional.empty();
     }
 
-    public static ObservableList<String> getTableNames(Connection connection) {
+    public static List<String> getTableNames(Connection connection) {
+        return getTableNames(connection, null);
+    }
+
+    public static ObservableList<String> getTableNames(Connection connection, String schema) {
         ObservableList<String> tableNames = FXCollections.observableArrayList();
 
         try {
+            System.out.println(schema);
             DatabaseMetaData databaseMetaData = connection.getMetaData();
-            ResultSet rs = databaseMetaData.getTables(null, null, "%", new String[]{"TABLE"});
+            ResultSet rs = databaseMetaData.getTables(
+                    null, schema, null, new String[]{"TABLE"});
 
             while (rs.next()) {
                 tableNames.add(rs.getString("TABLE_NAME"));
@@ -204,7 +208,8 @@ public final class Connections {
 
     public static Optional<TreeItem> getDatabaseSchema(Connection connection) {
         try {
-            TreeItem<ProfilerObject> rootItem = new TreeItem(new Database(connection.getCatalog()));
+            TreeItem<ProfilerObject> rootItem = new TreeItem(
+                    new Database(connection.getMetaData().getDatabaseProductName()));
             rootItem.setExpanded(true);
 
             TreeItem<ProfilerObject> rules = new TreeItem<>(new Rules());
@@ -215,28 +220,36 @@ public final class Connections {
 
             rootItem.getChildren().add(rules);
 
-            for(String tableName : getTableNames(connection)) {
-                Table table = new Table(connection, tableName, true);
-                table.setShowRowsCount(true);
-                TreeItem<ProfilerObject> tableItem = new TreeItem(table);
-                rootItem.getChildren().add(tableItem);
+            for(String schemaName : getSchemaNames(connection)) {
+                System.out.println(schemaName);
+                for (String tableName : getTableNames(connection, schemaName)) {
+                    System.out.println("\t" + tableName);
+                    Table table = new Table(connection, tableName, true, schemaName);
+                    table.setShowRowsCount(true);
+                    TreeItem<ProfilerObject> tableItem = new TreeItem(table);
+                    if(table.getRowCount() == 0) {
+                        continue;
+                    }
+                    rootItem.getChildren().add(tableItem);
 
-                ResultSet resultSet = connection.createStatement()
-                                                .executeQuery("SELECT * FROM " + table.getName() + " LIMIT 1");
+                    ResultSet resultSet = connection.createStatement()
+                            .executeQuery(String.format("SELECT * FROM %s.%s WHERE 1 = 2", schemaName, table.getName()));
+                    ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
 
-                while(resultSet.next()) {
-                    for(int i = 1, length = resultSet.getMetaData().getColumnCount(); i <= length; ++i) {
+                    for(int i = 1, length = resultSetMetaData.getColumnCount(); i <= length; ++i) {
+
+                        System.out.println("\t\t" + resultSetMetaData.getColumnName(i));
 
                         TreeItem<ProfilerObject> columnItem =
                                 new TreeItem<>(new TableColumn(table,
-                                                resultSet.getMetaData().getColumnName(i),
-                                                resultSet.getMetaData().getColumnType(i),
-                                                connection,
-                                                true));
-
+                                        resultSetMetaData.getColumnName(i),
+                                        resultSetMetaData.getColumnType(i),
+                                        connection,
+                                        true));
                         tableItem.getChildren().add(columnItem);
                     }
                 }
+
             }
 
             return Optional.of(rootItem);
@@ -259,5 +272,21 @@ public final class Connections {
         } catch (SQLException e) {}
 
         return Optional.empty();
+    }
+
+    public static List<String> getSchemaNames(Connection connection) {
+        List<String> schemaNames = new ArrayList<>();
+
+        try {
+            ResultSet schemas = connection.getMetaData().getSchemas();
+
+            while(schemas.next()) {
+             schemaNames.add(schemas.getString(1));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return schemaNames;
     }
 }

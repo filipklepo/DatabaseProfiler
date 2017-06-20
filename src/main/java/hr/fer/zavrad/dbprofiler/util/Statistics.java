@@ -171,7 +171,9 @@ public final class Statistics {
                 }
             }
             resultSet.close();
-            bdMean = bdMean.divide(BigDecimal.valueOf(totalValues - nullValues), 3, BigDecimal.ROUND_HALF_UP);
+            if(totalValues - nullValues != 0) {
+                bdMean = bdMean.divide(BigDecimal.valueOf(totalValues - nullValues), 3, BigDecimal.ROUND_HALF_UP);
+            }
             Long mean = bdMean.longValue();
 
             ResultSet stdDevResultSet = connection.createStatement().executeQuery(query);
@@ -187,10 +189,12 @@ public final class Statistics {
             }
             stdDevResultSet.close();
 
-            Long stdDev = Double.valueOf(Math.sqrt(bdStdDev.divide(
-                    BigDecimal.valueOf(
-                            totalValues - nullValues), 3, BigDecimal.ROUND_HALF_UP).doubleValue())).longValue();
-
+            Long stdDev = Long.valueOf(0);
+            if(totalValues - nullValues != 0) {
+                stdDev = Double.valueOf(Math.sqrt(bdStdDev.divide(
+                        BigDecimal.valueOf(
+                                totalValues - nullValues), 3, BigDecimal.ROUND_HALF_UP).doubleValue())).longValue();
+            }
             return Optional.of(
                     new DateColumnStatistics(nullValues, new Date(minimumValue),
                                              new Date(maximumValue), new Date(mean), stdDev, valuesByCount));

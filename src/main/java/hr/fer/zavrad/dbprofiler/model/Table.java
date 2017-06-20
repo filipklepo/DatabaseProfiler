@@ -1,7 +1,8 @@
-package hr.fer.zavrad.dbprofiler.model;
+package hr.fer.zavrad.dbprofiler.   model;
 
 import hr.fer.zavrad.dbprofiler.util.Connections;
 
+import javax.swing.text.html.Option;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,26 +16,28 @@ public class Table extends ProfilerObject {
     private int rowCount;
     private Optional<String> representationWithColumns;
     private Optional<String> representationWithRowsCount;
+    private String schemaName;
     private boolean showAttributes;
     private boolean showRowsCount;
 
-    public Table(Connection connection, String name) {
+    public Table(Connection connection, String name, String schemaName) {
         super(ProfilerObjectType.TABLE);
         this.name = name;
         this.representationWithColumns = Optional.empty();
         this.representationWithRowsCount = Optional.empty();
+        this.schemaName = schemaName;
 
         calculateRowCount(connection);
     }
 
-    public Table(Connection connection, String name, boolean rowCountRepresentation) {
-        this(connection, name);
+    public Table(Connection connection, String name, boolean rowCountRepresentation, String schemaName) {
+        this(connection, name, schemaName);
 
         List<String> attributes = new ArrayList<>();
         ResultSet resultSet = null;
         try {
             resultSet = connection.createStatement()
-                    .executeQuery("SELECT * FROM " + name + " LIMIT 1");
+                    .executeQuery("SELECT * FROM " + schemaName + "." + name + " LIMIT 1");
 
             while (resultSet.next()) {
                 for (int i = 1, length = resultSet.getMetaData().getColumnCount(); i <= length; ++i) {
@@ -57,7 +60,7 @@ public class Table extends ProfilerObject {
 
             this.representationWithColumns = Optional.of(joiner.toString());
             this.representationWithRowsCount = Optional.empty();
-
+            this.schemaName = schemaName;
         } catch (SQLException e) {
             this.representationWithColumns = Optional.empty();
             this.representationWithRowsCount = Optional.empty();
@@ -75,7 +78,7 @@ public class Table extends ProfilerObject {
             int rowsCount = 0;
 
             rowCountResultSet = connection.createStatement()
-                    .executeQuery("SELECT COUNT(*) AS COUNT FROM " + name);
+                    .executeQuery("SELECT COUNT(*) AS COUNT FROM " + schemaName + "." + name);
 
             while (rowCountResultSet.next()) {
                 rowsCount = rowCountResultSet.getInt("COUNT");
@@ -102,6 +105,10 @@ public class Table extends ProfilerObject {
 
     public int getRowCount() {
         return rowCount;
+    }
+
+    public String getSchemaName() {
+        return schemaName;
     }
 
     @Override
