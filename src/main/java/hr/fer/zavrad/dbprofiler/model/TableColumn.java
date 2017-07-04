@@ -15,9 +15,10 @@ public class TableColumn extends ProfilerObject {
     private final TableColumnType columnType;
     private Optional<ColumnStatistics> statistics;
     private final Connection connection;
+    private boolean statisticsCreated;
 
     public TableColumn(Table table, String columnName, int columnType, Connection connection,
-                       boolean generateStatistics) {
+                       boolean createStatistics) {
 
         super(ProfilerObjectType.COLUMN);
 
@@ -26,30 +27,7 @@ public class TableColumn extends ProfilerObject {
         this.columnType = Connections.getColumnType(columnType).get();
         this.connection = connection;
 
-        if(generateStatistics) {
-            if (Connections.isNumericColumn(this.columnType)) {
-                this.statistics =
-                        Statistics.generateNumericColumnStatistics(connection, table, this);
-            } else if (Connections.isTextualColumn(this.columnType)) {
-                this.statistics =
-                        Statistics.generateTextualColumnStatistics(connection, table, this);
-            } else if (this.columnType == TableColumnType.DATE) {
-                this.statistics =
-                        Statistics.generateDateColumnStatistics(connection, table, this);
-            } else if (this.columnType == TableColumnType.TIME) {
-                this.statistics =
-                        Statistics.generateTimeColumnStatistics(connection, table, this);
-            } else if(this.columnType == TableColumnType.TIMESTAMP) {
-                this.statistics =
-                        Statistics.generateTimestampColumnStatistics(connection, table, this);
-            } else if(this.columnType == TableColumnType.BIT) {
-                this.statistics =
-                        Statistics.generateBitColumnStatistics(connection, table, this);
-            } else {
-                this.statistics =
-                        Statistics.generateGenericColumnStatistics(connection, table, this);
-            }
-        }
+        if(createStatistics) createStatistics();
     }
 
     public Table getTable() {
@@ -66,6 +44,39 @@ public class TableColumn extends ProfilerObject {
 
     public Optional<ColumnStatistics> getStatistics() {
         return statistics;
+    }
+
+    public boolean isStatisticsCreated() {
+        return statisticsCreated;
+    }
+
+    public void createStatistics() {
+        if(statisticsCreated) return;
+
+        if (Connections.isNumericColumn(this.columnType)) {
+            this.statistics =
+                    Statistics.generateNumericColumnStatistics(connection, table, this);
+        } else if (Connections.isTextualColumn(this.columnType)) {
+            this.statistics =
+                    Statistics.generateTextualColumnStatistics(connection, table, this);
+        } else if (this.columnType == TableColumnType.DATE) {
+            this.statistics =
+                    Statistics.generateDateColumnStatistics(connection, table, this);
+        } else if (this.columnType == TableColumnType.TIME) {
+            this.statistics =
+                    Statistics.generateTimeColumnStatistics(connection, table, this);
+        } else if(this.columnType == TableColumnType.TIMESTAMP) {
+            this.statistics =
+                    Statistics.generateTimestampColumnStatistics(connection, table, this);
+        } else if(this.columnType == TableColumnType.BIT) {
+            this.statistics =
+                    Statistics.generateBitColumnStatistics(connection, table, this);
+        } else {
+            this.statistics =
+                    Statistics.generateGenericColumnStatistics(connection, table, this);
+        }
+
+        statisticsCreated = true;
     }
 
     @Override
