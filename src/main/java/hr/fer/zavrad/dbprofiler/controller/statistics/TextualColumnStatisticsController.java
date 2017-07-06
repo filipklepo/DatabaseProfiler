@@ -3,6 +3,7 @@ package hr.fer.zavrad.dbprofiler.controller.statistics;
 import hr.fer.zavrad.dbprofiler.model.statistics.TextualColumnStatistics;
 import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
 import javafx.scene.control.Label;
 
 public class TextualColumnStatisticsController {
@@ -39,6 +40,5 @@ public class TextualColumnStatisticsController {
 
         bcPatternInformation.getData().addAll(statistics.getPatternInformationData().get());
         bcPatternInformation.setTitle("Top 10 values by occurrences");
-
     }
 }

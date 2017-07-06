@@ -1,6 +1,5 @@
 package hr.fer.zavrad.dbprofiler.model.statistics;
 
-import hr.fer.zavrad.dbprofiler.model.statistics.ColumnStatistics;
 import javafx.scene.chart.XYChart;
 
 import java.sql.Date;
@@ -12,36 +11,58 @@ import java.util.stream.Collectors;
 
 public class DateColumnStatistics extends ColumnStatistics {
 
+    private static final int DISTRIBUTION_CHART_INTERVALS = 20;
+
     private final Date minimumValue;
     private final Date maximumValue;
     private final Date mean;
     private final XYChart.Series recordCountData;
     private final Optional<XYChart.Series> patternInformationData;
     private final Optional<XYChart.Series> distributionData;
+    private final Optional<List<Date>>  topTenPotWrongValues;
 
-    public DateColumnStatistics(Integer nullValuesCount, Date minimumValue, Date maximumValue,
+    public DateColumnStatistics(Integer totalValuesCount, Integer nullValuesCount, Date minimumValue, Date maximumValue,
                                 Date mean, Long stdDev, Map<Date, Integer> valuesByCount) {
 
         this.minimumValue = minimumValue;
         this.maximumValue = maximumValue;
         this.mean = mean;
 
-        long patternValuesCount = valuesByCount.entrySet().stream().filter(e -> e.getValue() > 1).count();
+        long repeatingValues = valuesByCount.entrySet().stream().filter(e -> e.getValue() > 1).count();
+        int repeatingValuesCount = valuesByCount.entrySet().stream().filter(e -> e.getValue() > 1).mapToInt(e -> e.getValue()).sum();
 
         recordCountData = new XYChart.Series();
         recordCountData.getData().add(new XYChart.Data("Null", nullValuesCount));
-        recordCountData.getData().add(new XYChart.Data("Distinct", patternValuesCount));
+        recordCountData.getData().add(new XYChart.Data("Non Null", totalValuesCount - nullValuesCount));
+        recordCountData.getData().add(new XYChart.Data("Unique", valuesByCount.size() - repeatingValues));
+        recordCountData.getData().add(new XYChart.Data("Repeating", repeatingValuesCount));
 
-        if(patternValuesCount < 5) {
-            patternInformationData = Optional.empty();
-            distributionData = Optional.empty();
+        if(repeatingValues < 2) {
+            this.patternInformationData = Optional.empty();
+            this.distributionData = Optional.empty();
+            this.topTenPotWrongValues = Optional.empty();
             return;
         }
 
         long threeSigma = stdDev * 3;
-        long potentiallyWrongValuesCount = valuesByCount.entrySet().stream()
-                .filter(e -> Double.compare(e.getKey().getTime(), threeSigma) > 0).count();
-        recordCountData.getData().add(new XYChart.Data("Pot. Wrong", potentiallyWrongValuesCount));
+        List<Map.Entry<Date,Integer>> potentiallyWrongValues = valuesByCount.entrySet().stream()
+                .filter(e -> Long.compare(e.getKey().getTime(), mean.getTime() + threeSigma) > 0 ||
+                        Long.compare(e.getKey().getTime(), mean.getTime() - threeSigma) < 0)
+                .sorted((e1, e2) -> Integer.compare(e2.getValue(), e1.getValue()))
+                .collect(Collectors.toList());
+
+
+        if(potentiallyWrongValues.size() > 0) {
+            recordCountData.getData().add(new XYChart.Data("Pot. Wrong",
+                    potentiallyWrongValues.stream().mapToInt(Map.Entry<Date,Integer>::getValue).sum()));
+
+            this.topTenPotWrongValues = Optional.of(potentiallyWrongValues.stream()
+                            .limit(10)
+                            .map(Map.Entry<Date,Integer>::getKey)
+                            .collect(Collectors.toList()));
+        } else {
+            this.topTenPotWrongValues = Optional.empty();
+        }
 
         List<XYChart.Data> data = valuesByCount.keySet().stream().sorted(new Comparator<Date>() {
             @Override
@@ -62,7 +83,12 @@ public class DateColumnStatistics extends ColumnStatistics {
         patternInformatonDataValues.getData().addAll(data);
 
         this.patternInformationData = Optional.of(patternInformatonDataValues);
-        this.distributionData = Optional.of(distributionDataValues);
+
+        if(distributionData.size() <= DISTRIBUTION_CHART_INTERVALS) {
+            this.distributionData = Optional.of(distributionDataValues);
+        } else {
+            this.distributionData = Optional.empty();
+        }
     }
 
     public Date getMinimumValue() {
@@ -87,5 +113,9 @@ public class DateColumnStatistics extends ColumnStatistics {
 
     public Optional<XYChart.Series> getDistributionData() {
         return distributionData;
+    }
+
+    public Optional<List<Date>> getTopTenPotWrongValues() {
+        return topTenPotWrongValues;
     }
 }

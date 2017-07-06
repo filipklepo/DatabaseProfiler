@@ -14,9 +14,6 @@ import java.util.Optional;
  */
 public final class Queries {
 
-    private static final int SELECT_LIMITLESS_THRESHOLD = 500_000;
-    private static final int SELECT_RANDOM_LIMIT = 50_000;
-
     public static final String POSTGRE = "PostgreSQL";
     public static final String MYSQL = "MySQL";
     public static final String SQL_SERVER = "Microsoft SQL Server";
@@ -24,35 +21,30 @@ public final class Queries {
     private Queries() {
     }
 
-    public static Optional<String> getSelectColumnQuery(Connection connection, Table table, TableColumn column) {
-
-        if(Integer.compare(table.getRowCount(), SELECT_LIMITLESS_THRESHOLD) <= 0) {
-            return Optional.of(String.format("SELECT %s FROM %s.%s", column.getColumnName(), table.getSchemaName(), table.getName()));
-        }
-
+    public static Optional<String> getSelectWithLimitQuery(Connection connection, Table table, int rowCountLimit) {
         String databaseType = null;
+
         try {
             databaseType = connection.getMetaData().getDatabaseProductName();
 
             switch(databaseType) {
                 case POSTGRE:
                     return Optional.of(
-                            String.format("SELECT %s FROM %s.%s ORDER BY RANDOM() LIMIT %d", column.getColumnName(), table.getSchemaName(), table.getName(), SELECT_RANDOM_LIMIT));
+                            String.format("SELECT * FROM %s.%s LIMIT %d",
+                                    table.getSchemaName(), table.getName(), rowCountLimit));
 
                 case MYSQL:
                     return Optional.of(
-                            String.format("SELECT %s FROM %s.%s ORDER BY RAND() LIMIT %d", column.getColumnName(), table.getSchemaName(), table.getName(), SELECT_RANDOM_LIMIT));
+                            String.format("SELECT * FROM %s.%s LIMIT %d",
+                                    table.getSchemaName(), table.getName(), rowCountLimit));
 
                 case SQL_SERVER:
                     return Optional.of(
-                            String.format("SELECT TOP %d %s FROM %s.%s ORDER BY newid()",
-                                    SELECT_RANDOM_LIMIT, column.getColumnName(), table.getSchemaName(), table.getName()));
-
-                default:
-                    return Optional.empty();
+                            String.format("SELECT TOP %d * FROM %s.%s",
+                                    rowCountLimit, table.getSchemaName(), table.getName()));
             }
-        } catch (SQLException e) {
-            return Optional.empty();
-        }
+        } catch (SQLException e) {}
+
+        return Optional.empty();
     }
 }

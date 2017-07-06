@@ -2,6 +2,8 @@ package hr.fer.zavrad.dbprofiler.controller;
 
 import hr.fer.zavrad.dbprofiler.model.Table;
 import hr.fer.zavrad.dbprofiler.util.Connections;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.embed.swing.SwingNode;
 import javafx.event.EventHandler;
@@ -29,6 +31,8 @@ public class RelationalDiagramController {
     @FXML
     private CheckBox cbShowAttributes;
     @FXML
+    private ListView<String> lvSchemas;
+    @FXML
     private ListView<Table> lvTables;
 
     private final Connection connection;
@@ -40,10 +44,18 @@ public class RelationalDiagramController {
     public void initialize() {
         lvTables.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-//        lvTables.setItems(
-//                FXCollections.observableArrayList(
-//                        Connections.getTableNames(connection).stream().map(t -> new Table(connection, t, false))
-//                                                                      .collect(Collectors.toList())));
+        lvSchemas.setItems(FXCollections.observableArrayList(Connections.getSchemaNames(connection)));
+
+        lvSchemas.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                lvTables.setItems(
+                                FXCollections.observableArrayList(Connections.getTableNames(connection, newValue)
+                                        .stream().map(t -> new Table(connection, t, newValue))
+                                        .collect(Collectors.toList())));
+            }
+        });
+        lvSchemas.getSelectionModel().selectFirst();
 
         btnSelectAll.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
@@ -61,6 +73,7 @@ public class RelationalDiagramController {
         btnOk.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
+                String selectedSchema = lvSchemas.getSelectionModel().getSelectedItem();
                 List<Table> selectedTables = lvTables.getSelectionModel().getSelectedItems();
 
                 ((Stage)btnOk.getScene().getWindow()).close();

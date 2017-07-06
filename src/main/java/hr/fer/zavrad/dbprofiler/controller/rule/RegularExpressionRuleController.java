@@ -15,6 +15,8 @@ public class RegularExpressionRuleController {
     @FXML
     private TextField tfRegularExpression;
     @FXML
+    private TextField tfSchema;
+    @FXML
     private TextField tfTable;
     @FXML
     private TextField tfColumn;
@@ -35,7 +37,7 @@ public class RegularExpressionRuleController {
             public void handle(MouseEvent event) {
                 lvResult.getItems().clear();
                 new RegularExpressionRule(
-                        connection, tfRegularExpression.getText(), tfTable.getText(), tfColumn.getText())
+                        connection, tfRegularExpression.getText(), tfSchema.getText(), tfTable.getText(), tfColumn.getText())
                         .execute(lvResult);
             }
         });

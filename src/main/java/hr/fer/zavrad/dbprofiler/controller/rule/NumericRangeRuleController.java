@@ -17,6 +17,8 @@ public class NumericRangeRuleController {
     @FXML
     private TextField tfTo;
     @FXML
+    private TextField tfSchema;
+    @FXML
     private TextField tfTable;
     @FXML
     private TextField tfColumn;
@@ -37,7 +39,7 @@ public class NumericRangeRuleController {
             public void handle(MouseEvent event) {
                 lvResult.getItems().clear();
                 new NumericRangeRule(
-                        connection, tfFrom.getText(), tfTo.getText(), tfTable.getText(), tfColumn.getText())
+                        connection, tfFrom.getText(), tfTo.getText(), tfSchema.getText(), tfTable.getText(), tfColumn.getText())
                             .execute(lvResult);
             }
         });

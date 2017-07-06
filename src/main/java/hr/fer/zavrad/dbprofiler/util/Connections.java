@@ -13,6 +13,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingNode;
 import javafx.scene.control.TreeItem;
+import sun.reflect.generics.tree.Tree;
 
 import javax.swing.*;
 import java.sql.*;
@@ -27,6 +28,7 @@ import java.util.*;
 public final class Connections {
 
     private static final Map<Integer, TableColumnType> COLUMN_TYPE;
+    private static final List<String> IGNORABLE_SCHEMAS;
 
     static {
         COLUMN_TYPE = new HashMap<>();
@@ -54,6 +56,11 @@ public final class Connections {
         COLUMN_TYPE.put(93, TableColumnType.TIMESTAMP);
         COLUMN_TYPE.put(1111, TableColumnType.OTHER);
         COLUMN_TYPE.put(2003, TableColumnType.TEXT);
+
+        IGNORABLE_SCHEMAS = new ArrayList<>();
+        IGNORABLE_SCHEMAS.add("sys");
+        IGNORABLE_SCHEMAS.add("information_schema");
+        IGNORABLE_SCHEMAS.add("pg_catalog");
     }
 
     public static boolean isNumericColumn(TableColumnType tableColumnType) {
@@ -72,6 +79,7 @@ public final class Connections {
         return tableColumnType == TableColumnType.LONGVARCHAR ||
                 tableColumnType == TableColumnType.CHAR       ||
                 tableColumnType == TableColumnType.VARCHAR    ||
+                tableColumnType == TableColumnType.NVARCHAR   ||
                 tableColumnType == TableColumnType.TEXT;
     }
 
@@ -90,9 +98,7 @@ public final class Connections {
         ObservableList<String> tableNames = FXCollections.observableArrayList();
 
         try {
-            System.out.println(schema);
-            DatabaseMetaData databaseMetaData = connection.getMetaData();
-            ResultSet rs = databaseMetaData.getTables(
+            ResultSet rs = connection.getMetaData().getTables(
                     null, schema, null, new String[]{"TABLE"});
 
             while (rs.next()) {
@@ -132,7 +138,8 @@ public final class Connections {
         return foreignKeysByTables;
     }
 
-    public static void createDatabaseRelationshipDiagram(List<Table> tables, SwingNode swingNode, Connection connection){
+    public static void createDatabaseRelationshipDiagram(List<Table> tables, SwingNode swingNode,
+                                                         Connection connection){
 
         Map<String, List<String>> foreignKeysByTables = getForeignKeysByTables(connection);
 
@@ -164,9 +171,17 @@ public final class Connections {
                 String[] lines = table.toString().split(System.lineSeparator());
                 int longestLineLength = Arrays.stream(lines).mapToInt(String::length).max().getAsInt();
 
-                Object vertex = graph.insertVertex(
-                        parent, null, table, i, i, longestLineLength * 8,
-                        lines.length * 18,"swimlane;rounded=1;");
+                Object vertex = null;
+                if(lines.length == 1) {
+                    vertex = graph.insertVertex(
+                            parent, null, table, i, i, longestLineLength * 10,
+                            25,"swimlane;rounded=1;");
+                } else {
+                    vertex = graph.insertVertex(
+                            parent, null, table, i, i, longestLineLength * 7,
+                            lines.length * 16,"swimlane;rounded=1;");
+                }
+
                 vertexMap.put(table.getName(), vertex);
             }
 
@@ -220,7 +235,11 @@ public final class Connections {
 
             rootItem.getChildren().add(rules);
 
-            for(String schemaName : getSchemaNames(connection)) {
+            List<String> schemaNames = getSchemaNames(connection);
+            for(String schemaName : schemaNames) {
+
+                TreeItem<ProfilerObject> schema = new TreeItem<>(new Schema(schemaName));
+
                 System.out.println(schemaName);
                 for (String tableName : getTableNames(connection, schemaName)) {
                     System.out.println("\t" + tableName);
@@ -230,15 +249,17 @@ public final class Connections {
                     if(table.getRowCount() == 0) {
                         continue;
                     }
-                    rootItem.getChildren().add(tableItem);
+                    if(schemaNames.size() > 1) {
+                        schema.getChildren().add(tableItem);
+                    } else {
+                        rootItem.getChildren().add(tableItem);
+                    }
 
                     ResultSet resultSet = connection.createStatement()
                             .executeQuery(String.format("SELECT * FROM %s.%s WHERE 1 = 2", schemaName, table.getName()));
                     ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
 
                     for(int i = 1, length = resultSetMetaData.getColumnCount(); i <= length; ++i) {
-
-                        System.out.println("\t\t" + resultSetMetaData.getColumnName(i));
 
                         TreeItem<ProfilerObject> columnItem =
                                 new TreeItem<>(new TableColumn(table,
@@ -250,6 +271,9 @@ public final class Connections {
                     }
                 }
 
+                if(!schema.getChildren().isEmpty()) {
+                    rootItem.getChildren().add(schema);
+                }
             }
 
             return Optional.of(rootItem);
@@ -259,34 +283,52 @@ public final class Connections {
         }
     }
 
-    public static Optional<TableColumnType> getColumnType(String column, String table, Connection connection) {
-        String query = String.format("SELECT %S FROM %s LIMIT 1", column, table);
+    public static Optional<TableColumnType> getColumnType(String schema, String column, String table, Connection connection) {
+        String query = String.format("SELECT %s FROM %s%s WHERE 1 = 0", column, !schema.isEmpty() ? schema  + "." : "", table);
 
         try {
-
             ResultSet resultSet = connection.createStatement().executeQuery(query);
-
-            while(resultSet.next()) {
-                return getColumnType(resultSet.getMetaData().getColumnType(1));
-            }
+            return getColumnType(resultSet.getMetaData().getColumnType(1));
         } catch (SQLException e) {}
 
         return Optional.empty();
     }
 
     public static List<String> getSchemaNames(Connection connection) {
-        List<String> schemaNames = new ArrayList<>();
+        List<String> displayableSchemas = new ArrayList<>();
 
         try {
+            List<String> allSchemas = new ArrayList<>();
             ResultSet schemas = connection.getMetaData().getSchemas();
 
             while(schemas.next()) {
-             schemaNames.add(schemas.getString(1));
+                allSchemas.add(schemas.getString(1));
+            }
+
+            for(String schema : allSchemas) {
+                if(!getTableNames(connection, schema).isEmpty() && !IGNORABLE_SCHEMAS.contains(schema.toLowerCase())) {
+                    displayableSchemas.add(schema);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return schemaNames;
+        return displayableSchemas;
+    }
+
+    public static List<String> getPrimaryKeys(Connection connection, Table table){
+        List<String> primaryKeys = new ArrayList<>();
+
+        try {
+            ResultSet resultSet = connection.getMetaData().getPrimaryKeys(null, table.getSchemaName(), table.getName());
+
+            while (resultSet.next()) {
+                primaryKeys.add(resultSet.getString("COLUMN_NAME"));
+            }
+        } catch (SQLException e) {
+        }
+
+        return primaryKeys;
     }
 }

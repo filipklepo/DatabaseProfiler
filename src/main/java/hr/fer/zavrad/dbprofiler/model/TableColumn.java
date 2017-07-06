@@ -46,7 +46,7 @@ public class TableColumn extends ProfilerObject {
         return statistics;
     }
 
-    public boolean isStatisticsCreated() {
+    public boolean statisticsCreated() {
         return statisticsCreated;
     }
 

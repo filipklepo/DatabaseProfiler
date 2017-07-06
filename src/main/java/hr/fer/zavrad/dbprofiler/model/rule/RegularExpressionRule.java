@@ -19,26 +19,28 @@ public class RegularExpressionRule extends Rule {
 
     private Connection connection;
     private String regularExpression;
+    private String schema;
     private String table;
     private String column;
 
-    public RegularExpressionRule(Connection connection, String regularExpression, String table, String column) {
+    public RegularExpressionRule(Connection connection, String regularExpression, String schema, String table, String column) {
         super(RuleType.REGULAR_EPRESSION);
         this.connection = connection;
         this.regularExpression = regularExpression;
+        this.schema = schema;
         this.table = table;
         this.column = column;
     }
 
     public RegularExpressionRule() {
-        this(null, null, null, null);
+        this(null, null, null, null, null);
     }
 
     @Override
     public void execute(ListView<String> listView) {
-        Optional<TableColumnType> columnType = Connections.getColumnType(column, table, connection);
+        Optional<TableColumnType> columnType = Connections.getColumnType(schema, column, table, connection);
         if(!columnType.isPresent()) {
-            AlertBox.display("SQL error", "Invalid column or table name");
+            AlertBox.display("SQL error", "Invalid schema, column or table name");
             return;
         }
 
@@ -55,7 +57,7 @@ public class RegularExpressionRule extends Rule {
             return;
         }
 
-        String query = String.format("SELECT %s FROM %S", column, table);
+        String query = String.format("SELECT %s FROM %s%s", column, !schema.isEmpty() ? schema + "."  : "", table);
 
         ResultSet resultSet = null;
         try {
@@ -71,7 +73,7 @@ public class RegularExpressionRule extends Rule {
 
                 resultCount++;
                 if(resultCount <= RESULTS_PRINT_LIMIT) {
-                    listView.getItems().add(String.format("%d. %s", resultCount, result));
+                    listView.getItems().add(String.format("%s", result));
 
                     if(resultCount == RESULTS_PRINT_LIMIT) {
                         listView.getItems().add("...");
@@ -81,7 +83,7 @@ public class RegularExpressionRule extends Rule {
 
             listView.getItems().add(String.format("Total count: %d%n", resultCount));
         } catch (SQLException e) {
-            e.printStackTrace();
+            AlertBox.display("Error", e.getMessage());
         }
     }
 }

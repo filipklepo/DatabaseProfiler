@@ -7,7 +7,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 import java.sql.Connection;
-import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Optional;
@@ -17,15 +16,18 @@ public class ConnectionGenerator {
 
     public static final String DEFAULT_ADDRESS = "127.0.0.1";
     private static final String CONNECTION_STRING_TEMPLATE = "jdbc:%s://%s:%s/";
+    private static final String SQL_SERVER_CONNECTION_STRING_TEMPLATE = "jdbc:%s://%s%s";
 
-    private final ObjectProperty<DatabaseType> type;
+    private final DatabaseType type;
 
-    private final StringProperty address;
-    private final StringProperty port;
-    private final StringProperty databaseName;
+    private final String address;
+    private final String port;
+    private final String databaseName;
 
-    private final StringProperty username;
-    private final StringProperty password;
+    private final String username;
+    private final String password;
+
+    private final Optional<String> instance;
 
     public ConnectionGenerator(DatabaseType type, String databaseName, String username, String password) {
         this(type, DEFAULT_ADDRESS, type.getPort(), databaseName, username, password);
@@ -33,13 +35,24 @@ public class ConnectionGenerator {
 
     public ConnectionGenerator(DatabaseType type, String address, String port,
                                String databaseName, String username, String password) {
+        this.type = type;
+        this.address = address;
+        this.port = port;
+        this.databaseName = databaseName;
+        this.username = username;
+        this.password = password;
+        this.instance = Optional.empty();
+    }
 
-        this.type = new SimpleObjectProperty<>(type);
-        this.address = new SimpleStringProperty(address);
-        this.port = new SimpleStringProperty(port);
-        this.databaseName = new SimpleStringProperty(databaseName);
-        this.username = new SimpleStringProperty(username);
-        this.password = new SimpleStringProperty(password);
+    public ConnectionGenerator(String address, String port, String databaseName, String username, String password,
+                               String instance) {
+        this.type = DatabaseType.SQL_SERVER;
+        this.address = address;
+        this.port = port;
+        this.databaseName = databaseName;
+        this.username = username;
+        this.password = password;
+        this.instance = !instance.isEmpty() ? Optional.of(instance) : Optional.empty();
     }
 
     /**
@@ -48,8 +61,8 @@ public class ConnectionGenerator {
      *
      * @return database connection
      */
-    public Optional<Connection> generate() {
-        switch(type.getValue()) {
+    public Connection generate() throws ConnectionGeneratorException {
+        switch(type) {
 
             case POSTGRE:
                 try {
@@ -58,7 +71,6 @@ public class ConnectionGenerator {
                     e.printStackTrace();
                 }
                 break;
-
             case MYSQL:
                 try {
                     Class.forName("org.mysql.Driver");
@@ -78,18 +90,30 @@ public class ConnectionGenerator {
         }
 
         try {
-            String connectionString = String.format(CONNECTION_STRING_TEMPLATE, type.getValue().getConnectionName(),
-                                        address.getValue(), port.getValue());
+            String connectionString = String.format(CONNECTION_STRING_TEMPLATE, type.getConnectionName(),
+                                        address, port);
+            switch (type) {
+                case SQL_SERVER:
+                    if(instance.isPresent()) {
+                        connectionString = String.format(SQL_SERVER_CONNECTION_STRING_TEMPLATE, type.getConnectionName(),
+                                address, "\\" + instance.get());
+                    } else {
+                        connectionString = String.format(SQL_SERVER_CONNECTION_STRING_TEMPLATE, type.getConnectionName(),
+                                address, ":" + port);
+                    }
 
-            Properties connectionProperties = new Properties();
-            connectionProperties.put("user", username.getValue());
-            connectionProperties.put("password", password.getValue());
-            connectionProperties.put("database", databaseName.getValue());
-            connectionProperties.put("port", port.getValue());
+                    Properties connectionProperties = new Properties();
+                    connectionProperties.put("database", databaseName);
+                    connectionProperties.put("user", username);
+                    connectionProperties.put("password", password);
 
-            return Optional.of(DriverManager.getConnection(connectionString, connectionProperties));
+                    return DriverManager.getConnection(connectionString, connectionProperties);
+                default:
+                    return DriverManager.getConnection(connectionString + databaseName, username, password);
+            }
+
         } catch (SQLException e) {
-            return Optional.empty();
+            throw new ConnectionGeneratorException(e.getMessage());
         }
     }
 }

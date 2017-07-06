@@ -1,10 +1,12 @@
 package hr.fer.zavrad.dbprofiler.controller.statistics;
 
 import hr.fer.zavrad.dbprofiler.model.statistics.TimestampColumnStatistics;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.LineChart;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 
 public class TimestampColumnStatisticsController {
 
@@ -24,6 +26,10 @@ public class TimestampColumnStatisticsController {
     private Label lblMeanValue;
     @FXML
     private LineChart lcDistribution;
+    @FXML
+    private Label lblPotWrongValues;
+    @FXML
+    private ListView lvPotWrongValues;
 
     private final TimestampColumnStatistics statistics;
 
@@ -40,16 +46,29 @@ public class TimestampColumnStatisticsController {
         lblMeanValue.setText(statistics.getMean().toString());
         lblStdDev.setText("");
 
+        lblPotWrongValues.visibleProperty().setValue(false);
+        lvPotWrongValues.visibleProperty().setValue(false);
+        lcDistribution.visibleProperty().setValue(false);
+
         if(!statistics.getPatternInformationData().isPresent()) {
             bcPatternInformation.visibleProperty().setValue(false);
-            lcDistribution.visibleProperty().setValue(false);
             return;
         }
 
         bcPatternInformation.getData().addAll(statistics.getPatternInformationData().get());
         bcPatternInformation.setTitle("Top 10 values by occurrences");
 
-        lcDistribution.setTitle("Distribution");
-        lcDistribution.getData().addAll(statistics.getDistributionData().get());
+        statistics.getDistributionData().ifPresent(d -> {
+            lcDistribution.setTitle("Distribution");
+            lcDistribution.visibleProperty().setValue(true);
+            lcDistribution.getData().add(d);
+        });
+
+        statistics.getTopTenPotWrongValues().ifPresent(v -> {
+            lblPotWrongValues.visibleProperty().setValue(true);
+            lvPotWrongValues.visibleProperty().setValue(true);
+
+            lvPotWrongValues.setItems(FXCollections.observableArrayList(statistics.getTopTenPotWrongValues().get()));
+        });
     }
 }

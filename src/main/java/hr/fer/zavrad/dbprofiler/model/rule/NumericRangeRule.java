@@ -18,20 +18,22 @@ public class NumericRangeRule extends Rule {
     private Connection connection;
     private String from;
     private String to;
+    private String schema;
     private String table;
     private String column;
 
-    public NumericRangeRule(Connection connection, String from, String to, String table, String column) {
+    public NumericRangeRule(Connection connection, String from, String to, String schema, String table, String column) {
         super(RuleType.NUMERIC_RANGE);
         this.connection = connection;
         this.from = from;
         this.to = to;
+        this.schema = schema;
         this.table = table;
         this.column = column;
     }
 
     public NumericRangeRule() {
-        this(null, null, null, null, null);
+        this(null, null, null, null, null, null);
     }
 
     @Override
@@ -52,9 +54,9 @@ public class NumericRangeRule extends Rule {
             return;
         }
 
-        Optional<TableColumnType> columnType = Connections.getColumnType(column, table, connection);
+        Optional<TableColumnType> columnType = Connections.getColumnType(schema, column, table, connection);
         if(!columnType.isPresent()) {
-            AlertBox.display("SQL error", "Invalid column or table name");
+            AlertBox.display("SQL error", "Invalid schema, column or table name");
             return;
         }
 
@@ -63,7 +65,7 @@ public class NumericRangeRule extends Rule {
             return;
         }
 
-        String query = String.format("SELECT %s FROM %S", column, table);
+        String query = String.format("SELECT %s FROM %s%s", column, !schema.isEmpty() ? schema + "."  : "", table);
 
         ResultSet resultSet = null;
         try {
@@ -88,7 +90,7 @@ public class NumericRangeRule extends Rule {
 
                 resultCount++;
                 if(resultCount <= RESULTS_PRINT_LIMIT) {
-                    listView.getItems().add(String.format("%d. %s", resultCount, result));
+                    listView.getItems().add(String.format("%s", result));
 
                     if(resultCount == RESULTS_PRINT_LIMIT) {
                         listView.getItems().add("...");
@@ -98,7 +100,7 @@ public class NumericRangeRule extends Rule {
 
             listView.getItems().add(String.format("Total count: %d%n", resultCount));
         } catch (SQLException e) {
-            e.printStackTrace();
+            AlertBox.display("Error", e.getMessage());
         }
     }
 }

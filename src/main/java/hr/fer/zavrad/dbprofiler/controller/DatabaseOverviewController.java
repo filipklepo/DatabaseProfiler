@@ -48,11 +48,13 @@ public class DatabaseOverviewController {
     }
 
     public void initialize() {
+        tvTables.setRoot(new TreeItem<>(new Schema("Statistics will appear soon.")));
         final Task<Void> task = new Task<Void>() {
             @Override
             protected Void call() throws Exception {
+                TreeItem<ProfilerObject> databaseSchema = Connections.getDatabaseSchema(connection).get();
                 Platform.runLater(() -> {
-                        tvTables.setRoot(Connections.getDatabaseSchema(connection).get());
+                    tvTables.setRoot(databaseSchema);
                 });
                 return null;
             }
@@ -156,7 +158,7 @@ public class DatabaseOverviewController {
                             e.printStackTrace();
                         }
 
-                        vbProfilerData.getChildren().addAll(rulePane);
+                        vbProfilerData.getChildren().add(rulePane);
                     } else if(rule.getRuleType() == RuleType.REGULAR_EPRESSION) {
                         BorderPane rulePane = null;
 
@@ -174,8 +176,26 @@ public class DatabaseOverviewController {
                             e.printStackTrace();
                         }
 
-                        vbProfilerData.getChildren().addAll(rulePane);
+                        vbProfilerData.getChildren().add(rulePane);
                     }
+                } else if(object.getProfilerObjectType() == ProfilerObjectType.TABLE) {
+                    BorderPane tablePane = null;
+
+                    FXMLLoader loader = new FXMLLoader();
+                    loader.setLocation(
+                            DatabaseOverviewController.class.getResource(
+                                    "/view/Table.fxml"));
+                    loader.setController(
+                            new TableQueryController(connection, (Table)object));
+
+                    try {
+                        tablePane = loader.load();
+                        lblDataName.setText(object.toString());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    vbProfilerData.getChildren().add(tablePane);
                 }
             }
         });

@@ -4,6 +4,7 @@ import hr.fer.zavrad.dbprofiler.controller.ConnectController;
 import hr.fer.zavrad.dbprofiler.controller.DatabaseOverviewController;
 import hr.fer.zavrad.dbprofiler.model.DatabaseType;
 import hr.fer.zavrad.dbprofiler.util.ConnectionGenerator;
+import hr.fer.zavrad.dbprofiler.util.ConnectionGeneratorException;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -39,60 +40,39 @@ public class DatabaseProfiler extends Application {
         initRootLayout();
     }
 
-    private void initRootLayout() throws IOException {
-//        FXMLLoader connectLoader = new FXMLLoader();
-//        connectLoader.setLocation(DatabaseProfiler.class.getResource("/view/Connect.fxml"));
-//        ConnectController connectController = new ConnectController(this);
-//        connectLoader.setController(connectController);
-//
-//        Scene connectScene = new Scene(connectLoader.load());
-//        connectStage.setScene(connectScene);
-//        connectStage.show();
-//        connectStage.setOnHidden(new EventHandler<WindowEvent>() {
-//
-//            @Override
-//            public void handle(WindowEvent event) {
-//
-//                if(connection.isPresent()) {
-//                    FXMLLoader loader = new FXMLLoader();
-//                    loader.setLocation(DatabaseProfiler.class.getResource("/view/DatabaseOverview.fxml"));
-//                    DatabaseOverviewController overviewController = new DatabaseOverviewController(connection.get());
-//                    loader.setController(overviewController);
-//
-//                    try {
-//                        Scene scene = new Scene(loader.load(), WINDOW_WIDTH, WINDOW_HEIGHT);
-//                        scene.getStylesheets().add(
-//                                DatabaseProfiler.class.getResource("/assets/database_overview.css").toExternalForm());
-//
-//                        primaryStage.setScene(scene);
-//                        primaryStage.show();
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }
-//        });
-//
-        FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(DatabaseProfiler.class.getResource("/view/DatabaseOverview.fxml"));
-        DatabaseOverviewController overviewController = new DatabaseOverviewController(
-                new ConnectionGenerator(DatabaseType.SQL_SERVER, "localhost",
-                        "1433", "northwind10M", "sa", "Chicago21236").generate().get());
-//        DatabaseOverviewController overviewController = new DatabaseOverviewController(
-//                new ConnectionGenerator(DatabaseType.POSTGRE, "localhost", "5432",
-//                        "dvdrental", "postgres", "filip95").generate().get());
-        loader.setController(overviewController);
+    private void initRootLayout() throws IOException, ConnectionGeneratorException {
+        FXMLLoader connectLoader = new FXMLLoader();
+        connectLoader.setLocation(DatabaseProfiler.class.getResource("/view/Connect.fxml"));
+        ConnectController connectController = new ConnectController(this);
+        connectLoader.setController(connectController);
 
-        try {
-            Scene scene = new Scene(loader.load(), WINDOW_WIDTH, WINDOW_HEIGHT);
-            scene.getStylesheets().add(
-                    DatabaseProfiler.class.getResource("/assets/database_overview.css").toExternalForm());
+        Scene connectScene = new Scene(connectLoader.load());
+        connectStage.setScene(connectScene);
+        connectStage.show();
+        connectStage.setOnHidden(new EventHandler<WindowEvent>() {
 
-            primaryStage.setScene(scene);
-            primaryStage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            @Override
+            public void handle(WindowEvent event) {
+
+                if(connection.isPresent()) {
+                    FXMLLoader loader = new FXMLLoader();
+                    loader.setLocation(DatabaseProfiler.class.getResource("/view/DatabaseOverview.fxml"));
+                    DatabaseOverviewController overviewController = new DatabaseOverviewController(connection.get());
+                    loader.setController(overviewController);
+
+                    try {
+                        Scene scene = new Scene(loader.load(), WINDOW_WIDTH, WINDOW_HEIGHT);
+                        scene.getStylesheets().add(
+                                DatabaseProfiler.class.getResource("/assets/database_overview.css").toExternalForm());
+
+                        primaryStage.setScene(scene);
+                        primaryStage.show();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
     }
 
     public Stage getConnectStage() {

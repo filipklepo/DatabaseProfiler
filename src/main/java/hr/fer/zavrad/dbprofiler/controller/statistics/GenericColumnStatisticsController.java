@@ -3,7 +3,9 @@ package hr.fer.zavrad.dbprofiler.controller.statistics;
 import hr.fer.zavrad.dbprofiler.model.statistics.GenericColumnStatistics;
 import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
+import javafx.scene.chart.LineChart;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 
 public class GenericColumnStatisticsController {
 
@@ -11,6 +13,8 @@ public class GenericColumnStatisticsController {
     private BarChart bcPatternInformation;
     @FXML
     private BarChart bcRecordCount;
+    @FXML
+    private LineChart lcDistribution;
     @FXML
     private Label lblMin;
     @FXML
@@ -27,6 +31,10 @@ public class GenericColumnStatisticsController {
     private Label lblMeanValue;
     @FXML
     private Label lblStdDevValue;
+    @FXML
+    private Label lblPotWrongValues;
+    @FXML
+    private ListView lvPotWrongValues;
 
     private final GenericColumnStatistics statistics;
 
@@ -46,7 +54,10 @@ public class GenericColumnStatisticsController {
         lblStdDev.setText("");
         lblMeanValue.setText("");
         lblStdDevValue.setText("");
+        lblPotWrongValues.setText("");
+        lvPotWrongValues.visibleProperty().setValue(false);
 
         bcPatternInformation.visibleProperty().setValue(false);
+        lcDistribution.visibleProperty().setValue(false);
     }
 }
